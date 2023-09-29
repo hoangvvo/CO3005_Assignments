@@ -1,3 +1,6 @@
+//
+// student ID: 2152355
+
 grammar CSlang;
 
 @lexer::header {
@@ -17,56 +20,17 @@ class_body: class_member*;
 class_member: attribute | method;
 
 // 2.2 Attribute declaration
-attribute: (CONST | VAR) (MEMBER_ID) (CM MEMBER_ID)* COLON data_type (
+attribute: (CONST | VAR) ('@'? ID) (CM ('@'? ID))* COLON data_type (
 		ASSIGN_OP expr (CM expr)*
 	)? SEMI;
 
 // 2.3 Method declaration
 constructor_method:
-	FUNC CONSTRUCTOR LP param_list? RP block_stmt;
+	FUNC CONSTRUCTOR LB param_list? RB block_stmt;
 method:
-	FUNC MEMBER_ID LP param_list? RP COLON (data_type | VOID) block_stmt;
+	FUNC ('@'? ID) LB param_list? RB COLON (data_type | VOID) block_stmt;
 param_list: param (CM param)*;
 param: ID (CM ID)* COLON data_type;
-
-data_type: BOOL | INT | FLOAT | STRING | array_type;
-
-// 5 Expressions
-expr: expr_string;
-expr_string: expr_string POW_OP expr_rela | expr_rela;
-expr_rela:
-	expr_rela (
-		EQUAL
-		| NOT_EQUAL
-		| LESS_THAN
-		| GREATER_THAN
-		| LESS_EQUAL
-		| GREATER_EQUAL
-	) expr_logic
-	| expr_logic;
-expr_logic: expr_logic (AND | OR) expr_add | expr_add;
-expr_add: expr_add (ADD_OP | SUB_OP) expr_multi | expr_multi;
-expr_multi:
-	expr_multi (MUL_OP | DIV_OP | BACKSLASH | MOD_OP) expr_logic_not
-	| expr_logic_not;
-expr_logic_not: NEGATE expr_sign | expr_sign;
-expr_sign: SUB_OP expr_index_op | expr_index_op;
-expr_index_op:
-	expr_index_op LS expr_instance_access RS
-	| expr_instance_access;
-expr_instance_access:
-	expr_instance_access DOT ID (
-		LB expr_static_access (CM expr_static_access)* RB
-	)?
-	| expr_static_access;
-expr_static_access: (ID DOT)? AT_ID (
-		LB expr_object_creation (CM expr_object_creation)* RB
-	)?
-	| expr_object_creation;
-expr_object_creation:
-	NEW ID LB (expr_term (CM expr_term)*)? RB
-	| expr_term;
-expr_term: LIT | SELF | ID | LP expr RP;
 
 // 6 Statements 
 stmt:
@@ -98,9 +62,47 @@ return_stmt: RETURN expr? SEMI;
 // 6.8 Method Invocation statement
 method_invocation_stmt:
 	expr DOT ID LB expr (CM expr)* RB SEMI
-	| (ID DOT)? AT_ID LB expr (CM expr)* RB SEMI;
+	| (ID DOT)? '@' ID LB expr (CM expr)* RB SEMI;
 // 6.9 Block statement
 block_stmt: LP stmt* RP;
+
+// 5 Expressions
+expr: expr POW_OP expr_rela | expr_rela;
+expr_rela:
+	expr_rela (
+		EQUAL
+		| NOT_EQUAL
+		| LESS_THAN
+		| GREATER_THAN
+		| LESS_EQUAL
+		| GREATER_EQUAL
+	) expr_logic
+	| expr_logic;
+expr_logic: expr_logic (AND | OR) expr_add | expr_add;
+expr_add: expr_add (ADD_OP | SUB_OP) expr_multi | expr_multi;
+expr_multi:
+	expr_multi (MUL_OP | DIV_OP | BACKSLASH | MOD_OP) expr_logic_not
+	| expr_logic_not;
+expr_logic_not: NEGATE expr_logic_not | expr_sign;
+expr_sign: SUB_OP expr_sign | expr_index_op;
+expr_index_op:
+	expr_index_op LS expr_instance_access RS
+	| expr_instance_access;
+expr_instance_access:
+	expr_instance_access DOT ID (
+		LB expr_static_access (CM expr_static_access)* RB
+	)?
+	| expr_static_access;
+expr_static_access: (ID DOT)? '@' ID (
+		LB expr_object_creation (CM expr_object_creation)* RB
+	)?
+	| expr_object_creation;
+expr_object_creation:
+	NEW ID LB (expr_term (CM expr_term)*)? RB
+	| expr_term;
+expr_term: LIT | SELF | ID | LB expr RB;
+
+data_type: BOOL | INT | FLOAT | STRING | array_type;
 
 // 3.2 Program comment
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
@@ -174,8 +176,9 @@ INT_LIT: [0-9]+;
 // 3.7.3 Boolean literal
 BOOL_LIT: TRUE | FALSE;
 // 3.7.4 String Literals
-STRING_LIT: '"' (ESC | ~["\r\n])* '"';
-fragment ESC: '\\' [btnfr"\\];
+fragment CHAR_LIT: ~["\\\r\n'] | ESC | '\'"';
+STRING_LIT: '"' CHAR_LIT* '"';
+fragment ESC: '\\' [bfrnt"\\];
 // 3.7.5 Array Literals
 ARRAY_LIT: LS LIT_EXCEPT_ARRAY? (CM LIT_EXCEPT_ARRAY)* RS;
 
@@ -185,12 +188,15 @@ element_type: BOOL | INT | FLOAT | STRING;
 
 // 3.3 Identifiers
 ID: [A-Za-z_][A-Za-z0-9_]*;
-AT_ID: '@' ID;
-MEMBER_ID: ID | AT_ID;
 
 WS: [ \t\r\n]+ -> skip;
 // skip spaces, tabs, newlines
 
-UNCLOSE_STRING: .;
-ILLEGAL_ESCAPE: .;
+UNCLOSE_STRING:
+	'"' CHAR_LIT* {raise UnclosedString(self.text[1:])};
+// ILLEGAL_ESCAPE with <wrong string> lexeme: when the lexer detects an illegal escape in string.
+// The wrong string is from the beginning of the string (without the opening quote) to the illegal
+// escape.
+ILLEGAL_ESCAPE:
+	'"' CHAR_LIT* ('\\' ~([bfrnt\\] | '\'')) {raise IllegalEscape(self.text[1:])};
 ERROR_CHAR: . {raise ErrorToken(self.text)};
