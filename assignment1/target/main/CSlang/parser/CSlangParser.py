@@ -1,4 +1,4 @@
-# Generated from /Users/hoang/Projects/CO3005_Assignments/assignment1/src/main/CSlang/parser/CSlang.g4 by ANTLR 4.9.2
+# Generated from main/CSlang/parser/CSlang.g4 by ANTLR 4.9.2
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -400,6 +400,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_program
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitProgram" ):
+                return visitor.visitProgram(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -463,6 +469,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_class_dcl
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitClass_dcl" ):
+                return visitor.visitClass_dcl(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -512,6 +524,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_class_super
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitClass_super" ):
+                return visitor.visitClass_super(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -550,6 +568,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_class_body
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitClass_body" ):
+                return visitor.visitClass_body(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -597,6 +621,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_class_member
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitClass_member" ):
+                return visitor.visitClass_member(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -678,6 +708,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_attribute
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAttribute" ):
+                return visitor.visitAttribute(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -778,6 +814,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_constructor_method
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitConstructor_method" ):
+                return visitor.visitConstructor_method(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -855,6 +897,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_method
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMethod" ):
+                return visitor.visitMethod(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -931,6 +979,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_param_list
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitParam_list" ):
+                return visitor.visitParam_list(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -992,6 +1046,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_param
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitParam" ):
+                return visitor.visitParam(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1056,6 +1116,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_data_type
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitData_type" ):
+                return visitor.visitData_type(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1118,6 +1184,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_expr
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr" ):
+                return visitor.visitExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1158,6 +1230,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_string
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_string" ):
+                return visitor.visitExpr_string(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1240,6 +1318,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_rela
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_rela" ):
+                return visitor.visitExpr_rela(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def expr_rela(self, _p:int=0):
@@ -1315,6 +1399,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_logic
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_logic" ):
+                return visitor.visitExpr_logic(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def expr_logic(self, _p:int=0):
@@ -1389,6 +1479,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_add
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_add" ):
+                return visitor.visitExpr_add(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1471,6 +1567,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_multi
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_multi" ):
+                return visitor.visitExpr_multi(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
     def expr_multi(self, _p:int=0):
@@ -1539,6 +1641,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_logic_not
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_logic_not" ):
+                return visitor.visitExpr_logic_not(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1590,6 +1698,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_sign
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_sign" ):
+                return visitor.visitExpr_sign(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1649,6 +1763,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_index_op
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_index_op" ):
+                return visitor.visitExpr_index_op(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1735,6 +1855,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_instance_access
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_instance_access" ):
+                return visitor.visitExpr_instance_access(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1844,6 +1970,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_static_access
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_static_access" ):
+                return visitor.visitExpr_static_access(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1947,6 +2079,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_object_creation
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_object_creation" ):
+                return visitor.visitExpr_object_creation(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2035,6 +2173,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_expr_term
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr_term" ):
+                return visitor.visitExpr_term(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2128,6 +2272,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_stmt
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStmt" ):
+                return visitor.visitStmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2252,6 +2402,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_dcl_stmt
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitDcl_stmt" ):
+                return visitor.visitDcl_stmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2344,6 +2500,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_assign_stmt
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAssign_stmt" ):
+                return visitor.visitAssign_stmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2396,6 +2558,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_if_stmt
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitIf_stmt" ):
+                return visitor.visitIf_stmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2474,6 +2642,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_for_stmt
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFor_stmt" ):
+                return visitor.visitFor_stmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2522,6 +2696,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_break_stmt
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBreak_stmt" ):
+                return visitor.visitBreak_stmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2559,6 +2739,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_continue_stmt
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitContinue_stmt" ):
+                return visitor.visitContinue_stmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2601,6 +2787,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_return_stmt
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitReturn_stmt" ):
+                return visitor.visitReturn_stmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2673,6 +2865,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_method_invocation_stmt
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMethod_invocation_stmt" ):
+                return visitor.visitMethod_invocation_stmt(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2785,6 +2983,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_block_stmt
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitBlock_stmt" ):
+                return visitor.visitBlock_stmt(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2841,6 +3045,12 @@ class CSlangParser ( Parser ):
         def getRuleIndex(self):
             return CSlangParser.RULE_array_type
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitArray_type" ):
+                return visitor.visitArray_type(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -2888,6 +3098,12 @@ class CSlangParser ( Parser ):
 
         def getRuleIndex(self):
             return CSlangParser.RULE_element_type
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitElement_type" ):
+                return visitor.visitElement_type(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
