@@ -1,0 +1,1 @@
+ func someId(a, b, c: int): void { } 

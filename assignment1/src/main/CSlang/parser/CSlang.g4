@@ -134,17 +134,17 @@ SUB_OP: '-';
 MUL_OP: '*';
 DIV_OP: '/';
 BACKSLASH: '\\';
+NOT_EQUAL: '!=';
 NEGATE: '!';
 AND: '&&';
 OR: '||';
 EQUAL: '==';
-ASSIGN_OP: '=';
-NOT_EQUAL: '!=';
-LESS_THAN: '<';
-LESS_EQUAL: '<=';
-GREATER_THAN: '>';
-GREATER_EQUAL: '>=';
 DECLARE_ASSIGN_OP: ':=';
+ASSIGN_OP: '=';
+LESS_EQUAL: '<=';
+LESS_THAN: '<';
+GREATER_EQUAL: '>=';
+GREATER_THAN: '>';
 POW_OP: '^';
 // NEW: 'new';
 MOD_OP: '%';
@@ -161,15 +161,13 @@ RP: '}';
 SEMI: ';';
 COLON: ':';
 
-// 3.7.5 Array Literals
-ARRAY_LIT: LS LIT_EXCEPT_ARRAY? (CM LIT_EXCEPT_ARRAY)* RS;
-
-// 4.2 Array type
-array_type: LS INT_LIT RS element_type;
-element_type: BOOL | INT | FLOAT | STRING;
-
 // 3.7 Literals
-LIT: INT_LIT | FLOAT_LIT | BOOL_LIT | STRING_LIT | ARRAY_LIT;
+LIT:
+	INT_LIT
+	| FLOAT_LIT
+	| BOOL_LIT
+	| STRING_LIT {self.text = self.text[1:-1]}
+	| ARRAY_LIT;
 LIT_EXCEPT_ARRAY: INT_LIT | FLOAT_LIT | BOOL_LIT | STRING_LIT;
 
 // 3.7.2 Float Literal
@@ -182,7 +180,14 @@ BOOL_LIT: TRUE | FALSE;
 // 3.7.4 String Literals
 fragment CHAR_LIT: ~["\\\r\n'] | ESC | '\'"';
 fragment ESC: '\\' [bfrnt"\\];
-STRING_LIT: '"' CHAR_LIT* '"' { self.text = self.text[1:-1] };
+STRING_LIT: '"' CHAR_LIT* '"' {self.text = self.text[1:-1]};
+
+// 3.7.5 Array Literals
+ARRAY_LIT: LS LIT_EXCEPT_ARRAY? (CM LIT_EXCEPT_ARRAY)* RS;
+
+// 4.2 Array type
+array_type: LS INT_LIT RS element_type;
+element_type: BOOL | INT | FLOAT | STRING;
 
 // 3.3 Identifiers
 ID: [A-Za-z_][A-Za-z0-9_]*;
@@ -192,7 +197,7 @@ WS: [ \t\r\n]+ -> skip;
 // skip spaces, tabs, newlines
 
 UNCLOSE_STRING:
-	'"' CHAR_LIT* {raise UnclosedString(self.text[1:])};
+	'"' CHAR_LIT* {raise UncloseString(self.text[1:])};
 
 ILLEGAL_ESCAPE:
 	'"' CHAR_LIT* ('\\' ~([bfrnt\\] | '\'')) {raise IllegalEscape(self.text[1:])};

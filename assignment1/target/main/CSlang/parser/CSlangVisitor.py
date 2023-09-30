@@ -39,6 +39,21 @@ class CSlangVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by CSlangParser#attribute_inner_without_init.
+    def visitAttribute_inner_without_init(self, ctx:CSlangParser.Attribute_inner_without_initContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CSlangParser#attribute_inner_with_init.
+    def visitAttribute_inner_with_init(self, ctx:CSlangParser.Attribute_inner_with_initContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CSlangParser#attribute_inner_with_init_tail.
+    def visitAttribute_inner_with_init_tail(self, ctx:CSlangParser.Attribute_inner_with_init_tailContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by CSlangParser#constructor_method.
     def visitConstructor_method(self, ctx:CSlangParser.Constructor_methodContext):
         return self.visitChildren(ctx)
@@ -56,76 +71,6 @@ class CSlangVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by CSlangParser#param.
     def visitParam(self, ctx:CSlangParser.ParamContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#data_type.
-    def visitData_type(self, ctx:CSlangParser.Data_typeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr.
-    def visitExpr(self, ctx:CSlangParser.ExprContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_string.
-    def visitExpr_string(self, ctx:CSlangParser.Expr_stringContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_rela.
-    def visitExpr_rela(self, ctx:CSlangParser.Expr_relaContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_logic.
-    def visitExpr_logic(self, ctx:CSlangParser.Expr_logicContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_add.
-    def visitExpr_add(self, ctx:CSlangParser.Expr_addContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_multi.
-    def visitExpr_multi(self, ctx:CSlangParser.Expr_multiContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_logic_not.
-    def visitExpr_logic_not(self, ctx:CSlangParser.Expr_logic_notContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_sign.
-    def visitExpr_sign(self, ctx:CSlangParser.Expr_signContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_index_op.
-    def visitExpr_index_op(self, ctx:CSlangParser.Expr_index_opContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_instance_access.
-    def visitExpr_instance_access(self, ctx:CSlangParser.Expr_instance_accessContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_static_access.
-    def visitExpr_static_access(self, ctx:CSlangParser.Expr_static_accessContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_object_creation.
-    def visitExpr_object_creation(self, ctx:CSlangParser.Expr_object_creationContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by CSlangParser#expr_term.
-    def visitExpr_term(self, ctx:CSlangParser.Expr_termContext):
         return self.visitChildren(ctx)
 
 
@@ -176,6 +121,21 @@ class CSlangVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by CSlangParser#block_stmt.
     def visitBlock_stmt(self, ctx:CSlangParser.Block_stmtContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CSlangParser#expr.
+    def visitExpr(self, ctx:CSlangParser.ExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CSlangParser#expr_list.
+    def visitExpr_list(self, ctx:CSlangParser.Expr_listContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by CSlangParser#data_type.
+    def visitData_type(self, ctx:CSlangParser.Data_typeContext):
         return self.visitChildren(ctx)
 
 

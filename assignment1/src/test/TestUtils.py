@@ -35,6 +35,10 @@ class TestLexer:
         TestLexer.check(SOL_DIR, inputfile, num)
         dest = open(SOL_DIR + str(num) + ".txt", "r")
         line = dest.read()
+        if line != expect:
+            print("Error at test case " + str(num) + ":")
+            print("Expected:    " + expect)
+            print("But found:   " + line)
         return line == expect
 
     @staticmethod
