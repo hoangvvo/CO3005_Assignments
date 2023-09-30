@@ -20,15 +20,24 @@ class_body: class_member*;
 class_member: attribute | method;
 
 // 2.2 Attribute declaration
-attribute: (CONST | VAR) ('@'? ID) (CM ('@'? ID))* COLON data_type (
-		ASSIGN_OP expr (CM expr)*
-	)? SEMI;
+attribute: (CONST | VAR) (
+		attribute_inner_with_init
+		| attribute_inner_without_init
+	) SEMI;
+
+attribute_inner_without_init: (AT_ID | ID) (CM (AT_ID | ID))* COLON data_type;
+
+attribute_inner_with_init: (AT_ID | ID) attribute_inner_with_init_tail expr;
+
+attribute_inner_with_init_tail:
+	CM (AT_ID | ID) attribute_inner_with_init_tail expr CM
+	| COLON data_type ASSIGN_OP;
 
 // 2.3 Method declaration
 constructor_method:
 	FUNC CONSTRUCTOR LB param_list? RB block_stmt;
 method:
-	FUNC ('@'? ID) LB param_list? RB COLON (data_type | VOID) block_stmt;
+	FUNC (AT_ID | ID) LB param_list? RB COLON (data_type | VOID) block_stmt;
 param_list: param (CM param)*;
 param: ID (CM ID)* COLON data_type;
 
@@ -43,10 +52,8 @@ stmt:
 	| return_stmt
 	| method_invocation_stmt
 	| block_stmt;
-// 6.1 Variable and Constant Declaration Statement
-dcl_stmt: (CONST | VAR) (ID) (CM ID)* COLON data_type (
-		ASSIGN_OP expr (CM expr)*
-	)? SEMI;
+// 6.1 Variable and Constant Declaration Statement 
+dcl_stmt: attribute;
 // 6.2 Assignment Statement TODO: FIXME lhs assign_stmt
 assign_stmt: expr DECLARE_ASSIGN_OP expr SEMI;
 // 6.3 If Statement
@@ -61,46 +68,36 @@ continue_stmt: CONTINUE SEMI;
 return_stmt: RETURN expr? SEMI;
 // 6.8 Method Invocation statement
 method_invocation_stmt:
-	expr DOT ID LB expr (CM expr)* RB SEMI
-	| (ID DOT)? '@' ID LB expr (CM expr)* RB SEMI;
+	expr DOT ID LB expr_list RB SEMI
+	| (ID DOT)? AT_ID LB expr_list RB SEMI;
 // 6.9 Block statement
 block_stmt: LP stmt* RP;
 
 // 5 Expressions
-expr: expr POW_OP expr_rela | expr_rela;
-expr_rela:
-	expr_rela (
+expr:
+	LB expr RB
+	| <assoc = right> NEW ID LB (expr_list)? RB
+	| (ID DOT)? AT_ID (LB expr_list RB)?
+	| <assoc = left> expr DOT ID (LB expr_list RB)?
+	| expr LS expr RS
+	| <assoc = right> SUB_OP expr
+	| <assoc = right> NEGATE expr
+	| <assoc = left> expr (MUL_OP | DIV_OP | BACKSLASH | MOD_OP) expr
+	| <assoc = left> expr (ADD_OP | SUB_OP) expr
+	| <assoc = left> expr (AND | OR) expr
+	| expr (
 		EQUAL
 		| NOT_EQUAL
 		| LESS_THAN
 		| GREATER_THAN
 		| LESS_EQUAL
 		| GREATER_EQUAL
-	) expr_logic
-	| expr_logic;
-expr_logic: expr_logic (AND | OR) expr_add | expr_add;
-expr_add: expr_add (ADD_OP | SUB_OP) expr_multi | expr_multi;
-expr_multi:
-	expr_multi (MUL_OP | DIV_OP | BACKSLASH | MOD_OP) expr_logic_not
-	| expr_logic_not;
-expr_logic_not: NEGATE expr_logic_not | expr_sign;
-expr_sign: SUB_OP expr_sign | expr_index_op;
-expr_index_op:
-	expr_index_op LS expr_instance_access RS
-	| expr_instance_access;
-expr_instance_access:
-	expr_instance_access DOT ID (
-		LB expr_static_access (CM expr_static_access)* RB
-	)?
-	| expr_static_access;
-expr_static_access: (ID DOT)? '@' ID (
-		LB expr_object_creation (CM expr_object_creation)* RB
-	)?
-	| expr_object_creation;
-expr_object_creation:
-	NEW ID LB (expr_term (CM expr_term)*)? RB
-	| expr_term;
-expr_term: LIT | SELF | ID | LB expr RB;
+	) expr
+	| expr POW_OP expr
+	| LIT
+	| SELF
+	| ID;
+expr_list: expr (CM expr)*;
 
 data_type: BOOL | INT | FLOAT | STRING | array_type;
 
@@ -164,6 +161,13 @@ RP: '}';
 SEMI: ';';
 COLON: ':';
 
+// 3.7.5 Array Literals
+ARRAY_LIT: LS LIT_EXCEPT_ARRAY? (CM LIT_EXCEPT_ARRAY)* RS;
+
+// 4.2 Array type
+array_type: LS INT_LIT RS element_type;
+element_type: BOOL | INT | FLOAT | STRING;
+
 // 3.7 Literals
 LIT: INT_LIT | FLOAT_LIT | BOOL_LIT | STRING_LIT | ARRAY_LIT;
 LIT_EXCEPT_ARRAY: INT_LIT | FLOAT_LIT | BOOL_LIT | STRING_LIT;
@@ -177,26 +181,19 @@ INT_LIT: [0-9]+;
 BOOL_LIT: TRUE | FALSE;
 // 3.7.4 String Literals
 fragment CHAR_LIT: ~["\\\r\n'] | ESC | '\'"';
-STRING_LIT: '"' CHAR_LIT* '"';
 fragment ESC: '\\' [bfrnt"\\];
-// 3.7.5 Array Literals
-ARRAY_LIT: LS LIT_EXCEPT_ARRAY? (CM LIT_EXCEPT_ARRAY)* RS;
-
-// 4.2 Array type
-array_type: LS INT_LIT RS element_type;
-element_type: BOOL | INT | FLOAT | STRING;
+STRING_LIT: '"' CHAR_LIT* '"' { self.text = self.text[1:-1] };
 
 // 3.3 Identifiers
 ID: [A-Za-z_][A-Za-z0-9_]*;
+AT_ID: '@' [A-Za-z0-9_]+;
 
 WS: [ \t\r\n]+ -> skip;
 // skip spaces, tabs, newlines
 
 UNCLOSE_STRING:
 	'"' CHAR_LIT* {raise UnclosedString(self.text[1:])};
-// ILLEGAL_ESCAPE with <wrong string> lexeme: when the lexer detects an illegal escape in string.
-// The wrong string is from the beginning of the string (without the opening quote) to the illegal
-// escape.
+
 ILLEGAL_ESCAPE:
 	'"' CHAR_LIT* ('\\' ~([bfrnt\\] | '\'')) {raise IllegalEscape(self.text[1:])};
 ERROR_CHAR: . {raise ErrorToken(self.text)};
