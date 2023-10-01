@@ -1,0 +1,10 @@
+
+class A {
+    var a: bool = true;
+    var b: bool = !x;
+    var c: bool = x && y;
+    var d: bool = x || y;
+    var e: bool = x == y;
+    var f: bool = x != y;
+}
+    

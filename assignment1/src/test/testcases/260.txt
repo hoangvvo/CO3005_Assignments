@@ -1,0 +1,9 @@
+
+class A {
+    func foo(): void {
+        x.a := 1;
+        x.b := y.c.d.e;
+        x.c.d.e.f := x.c;
+    }
+}
+    

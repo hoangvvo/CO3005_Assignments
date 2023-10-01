@@ -1,0 +1,6 @@
+
+class A {
+    var a,b,c: int;
+    var @d,@e,@f: string;
+}
+    

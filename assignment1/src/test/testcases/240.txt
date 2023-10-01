@@ -1,0 +1,11 @@
+
+class A {
+    var a: string = "Hello\bWorld";
+    var b: string = "Hello\fWorld";
+    var c: string = "Hello\rWorld";
+    var d: string = "Hello\nWorld";
+    var e: string = "Hello\tWorld";
+    var f: string = "Hello\"World";
+    var g: string = "Hello\\World";
+}
+    

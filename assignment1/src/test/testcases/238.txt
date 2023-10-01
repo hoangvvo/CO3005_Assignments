@@ -1,0 +1,6 @@
+
+class A {
+    var a: bool = true;
+    var b: bool = false;
+}
+    

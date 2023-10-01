@@ -1,0 +1,7 @@
+
+class A {
+    func foo(): int {
+        return a[0];
+    }
+}
+    

@@ -1,0 +1,10 @@
+
+class A {
+    func foo(): void {
+        a.foo();
+        a.quz(d, e, f);
+        b.buzz().qox(a, b, c);
+        a.foo().bar().quz();
+    }
+}
+    

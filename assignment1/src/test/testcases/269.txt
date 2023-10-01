@@ -1,0 +1,9 @@
+
+class A {
+    func foo(): void {
+        const a: int = 1;
+        const a, b, c: int = 1, 2, 3;
+        const a, b, c: int = @foo(), @bar(), @quz();
+    }
+}
+    

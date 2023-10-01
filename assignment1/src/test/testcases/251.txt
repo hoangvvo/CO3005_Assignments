@@ -1,0 +1,5 @@
+
+class A {
+    var a: [5][5]int;
+}
+    

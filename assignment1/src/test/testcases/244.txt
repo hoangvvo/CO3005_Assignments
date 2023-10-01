@@ -1,0 +1,14 @@
+
+class A {
+    var a: int = 1;
+    var b: int = x + y;
+    var c: int = x - y;
+    var d: int = x * y;
+    var e: int = x \ y;
+    var f: int = x % y;
+    var g: bool = x == y;
+    var h: bool = x != y;
+    var i: bool = x < y;
+    var j: bool = x <= y;
+}
+    

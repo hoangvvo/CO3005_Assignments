@@ -1,0 +1,8 @@
+
+class A {
+    func foo(): void {
+        if j > i {j := j - 1;}
+        else
+    }
+}
+    

@@ -1,0 +1,1 @@
+floatA + 0.0 - floatC * 128.0 / floatE % 12.08e-5

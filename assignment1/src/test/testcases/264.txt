@@ -1,0 +1,10 @@
+
+class A {
+    func foo(): void {
+        A.@test();
+        @test();
+        B.@test(a,b, c);
+        @test(a,b,c);
+    }
+}
+    

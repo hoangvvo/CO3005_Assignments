@@ -1,0 +1,8 @@
+
+class A {
+    var a: int = 123;
+    var b: int = 0;
+    var c: int = 1234567890;
+    var d: int = 000; // allows leading zeros
+}
+    

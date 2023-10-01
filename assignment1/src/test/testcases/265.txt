@@ -1,0 +1,9 @@
+
+class A {
+    func foo(): void {
+        var a: A = new A();
+        var b: A = new A(a, b, c);
+        var c: A = null;
+    }
+}
+    

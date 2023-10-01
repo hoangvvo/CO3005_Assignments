@@ -1,0 +1,8 @@
+
+class A {
+    var a: float = 123.0;
+    var b: float = 0.0;
+    var c: float = 1234567890.0;
+    var d: float = 1.;
+}
+    

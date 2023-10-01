@@ -1,0 +1,8 @@
+
+class A {
+    var @abcd: int;
+    var @_abc890: int;
+    var @a_0_b: int;
+    var @000: int;
+}
+    

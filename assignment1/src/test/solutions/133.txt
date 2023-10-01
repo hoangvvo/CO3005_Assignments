@@ -1,1 +1,1 @@
-boolA,&&,boolB,||,!,boolC,==,boolD,&&,boolE,!=,boolF,<EOF>
+void,<EOF>

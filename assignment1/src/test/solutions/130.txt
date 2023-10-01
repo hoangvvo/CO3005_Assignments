@@ -1,1 +1,1 @@
-Illegal Escape In String: This is an illegal escape string \a
+var,<EOF>

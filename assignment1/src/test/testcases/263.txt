@@ -1,0 +1,8 @@
+
+class A {
+    func foo(): void {
+        A.@numOfShape := A.@numOfShape + 1;
+        @numOfShape := @numOfShape + 1;
+    }
+}
+    

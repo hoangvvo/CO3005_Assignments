@@ -1,0 +1,5 @@
+
+class A {
+    var a: int = 123a;
+}
+    

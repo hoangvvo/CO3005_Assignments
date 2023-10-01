@@ -1,0 +1,8 @@
+
+class A {
+    func foo(): void {
+        x := a.quz().a;
+        y := @buzz().a;
+    }
+}
+    

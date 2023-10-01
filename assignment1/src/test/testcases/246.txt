@@ -1,0 +1,7 @@
+
+class A {
+    func foo(): void {
+        var a: string = "Hello" + "World";
+    }
+}
+    

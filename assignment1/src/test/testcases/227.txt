@@ -1,0 +1,7 @@
+
+class A {
+    var abcd: int;
+    var _abc890: int;
+    var __0: int;
+}
+    

@@ -1,0 +1,5 @@
+
+class A {
+    // This is a comment
+}
+    

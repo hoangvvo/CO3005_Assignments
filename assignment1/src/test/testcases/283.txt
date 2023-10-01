@@ -1,0 +1,17 @@
+
+class A {
+    func foo(): void {
+        return;
+        return 1;
+        return 1.0;
+        return true;
+        return "Hello World";
+        return a;
+        return @foo();
+        return A.b(1,2,3);
+        return new A();
+        return null;
+        return [1,2,3];
+    }
+}
+    
