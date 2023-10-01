@@ -1,7 +1,0 @@
-
-class Program {
-func @main():void {
-io.@writeInt(Shape.@numOfShape);
-}
-}
-    

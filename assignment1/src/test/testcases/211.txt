@@ -1,6 +1,0 @@
-
-class A {
-var a: int;
-var @b: int;
-}
-    

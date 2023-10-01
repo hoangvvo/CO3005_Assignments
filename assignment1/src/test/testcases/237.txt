@@ -1,5 +1,0 @@
-
-class A {
-    var a: float = 123.0e;
-}
-    

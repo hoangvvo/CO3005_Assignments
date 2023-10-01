@@ -1,5 +1,0 @@
-
-class A {
-const a,b,c: int = 1,2;
-}
-    

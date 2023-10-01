@@ -1,7 +1,0 @@
-
-class A {
-    func foo(): void {
-        const a, b, c: int = 1, 2;
-    }
-}
-    

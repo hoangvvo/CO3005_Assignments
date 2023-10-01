@@ -1,7 +1,0 @@
-
-class A {
-    func foo(): void {
-        x.b[2] := x.m()[3];
-    }
-}
-    

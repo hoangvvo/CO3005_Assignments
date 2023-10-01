@@ -1,1 +1,0 @@
-const a, b, c: int = foo(x, y, z), X.foo, @bar(n);

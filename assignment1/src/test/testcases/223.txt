@@ -1,5 +1,0 @@
-
-class A {
-    func constructor (a: int, b: float) {}
-}
-    

@@ -1,6 +1,0 @@
-
-class A {
-    var a: [5]int;
-    var b: [123]float;
-}
-    

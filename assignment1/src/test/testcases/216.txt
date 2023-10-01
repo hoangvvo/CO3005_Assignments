@@ -1,6 +1,0 @@
-
-class A {
-    func foo(a: int, b: float): string {}
-    func @bar(a: string, b: [5]int): int {}
-}
-    

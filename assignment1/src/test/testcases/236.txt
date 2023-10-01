@@ -1,5 +1,0 @@
-
-class A {
-    var a: float = .12; # missing integer part
-}
-    

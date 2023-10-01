@@ -1,7 +1,0 @@
-
-class A {
-    func foo(): void {
-        a.foo()
-    }
-}
-    

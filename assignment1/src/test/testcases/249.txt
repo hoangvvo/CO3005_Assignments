@@ -1,5 +1,0 @@
-
-class A {
-    const a: void = 1;
-}
-    

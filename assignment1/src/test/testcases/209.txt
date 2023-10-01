@@ -1,6 +1,0 @@
-
-class A {
-const a,b,c: int = 1,2,3;
-const @d,@e,@f: int = 4,5,6;
-}
-    

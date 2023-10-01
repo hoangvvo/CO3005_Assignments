@@ -1,1 +1,0 @@
-intA + 0 - intC * 128 / intE % intF

@@ -1,1 +1,0 @@
-io,.,@readInt,(,),;,io,.,@writeInt,(,123,),;,io,.,@readFloat,(,),;,io,.,@writeFloat,(,123.0,),;,io,.,@readBool,(,),;,io,.,@writeBool,(,true,),;,io,.,@readStr,(,),;,io,.,@writeStr,(,Some string,),;,<EOF>

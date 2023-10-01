@@ -1,9 +1,0 @@
-
-class A {
-    func foo(): void {
-        self.aPI := 3.14;
-        value := x.foo(5);
-        l[3] := value * 2;
-    }
-}
-    
