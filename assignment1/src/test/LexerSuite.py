@@ -40,25 +40,39 @@ class LexerSuite(unittest.TestCase):
         self.assertTrue(TestLexer.test("() [ ] .,;:{}", "(,),[,],.,,,;,:,{,},<EOF>", 117))
     def test_integer_literal(self):
         self.assertTrue(TestLexer.test("123", "123,<EOF>", 118))
-    def test_float_literal(self):
-        self.assertTrue(TestLexer.test("9.0 12e8 1. 0.33E-3 128e+42", "9.0,12e8,1.,0.33E-3,128e+42,<EOF>", 119))
+    def test_float_literal_1(self):
+        self.assertTrue(TestLexer.test("9.0 10.0 1.0 0.33334 128.0", "9.0,10.0,1.0,0.33334,128.0,<EOF>", 119))
+    def test_float_literal_2(self):
+        self.assertTrue(TestLexer.test("12E8 4e5 1999E9991 128e+42", "12E8,4e5,1999E9991,128e+42,<EOF>", 120))
+    def test_float_literal_3(self):
+        self.assertTrue(TestLexer.test("0.33e5 0.33e-5 0.33E+5 0.33E-5", "0.33e5,0.33e-5,0.33E+5,0.33E-5,<EOF>", 121))
     def test_float_literal_not(self):
         # not literal so parse to different tokens
-        self.assertTrue(TestLexer.test(".12 143e 1.2e 1.2e- 1.2e+ 1.2e+e", ".,12,143,e,1.2,e,1.2,e,-,1.2,e,+,1.2,e,+,e,<EOF>", 120))
+        self.assertTrue(TestLexer.test(".12 143e 1.2e 1.2e- 1.2e+ 1.2e+e", ".,12,143,e,1.2,e,1.2,e,-,1.2,e,+,1.2,e,+,e,<EOF>", 122))
     def test_boolean_literal(self):
-        self.assertTrue(TestLexer.test("true false", "true,false,<EOF>", 121))
+        self.assertTrue(TestLexer.test("true false", "true,false,<EOF>", 123))
     def test_string_literal_escapes(self):
         self.assertTrue(TestLexer.test("""
 "This is a string containing tab \\t"
 "He asked me: \\"Where is John?\\""
-""", "This is a string containing tab \\t,He asked me: \\\"Where is John?\\\",<EOF>", 122))
+""", "This is a string containing tab \\t,He asked me: \\\"Where is John?\\\",<EOF>", 124))
     def test_string_literal_escape_backslash(self):
-        self.assertTrue(TestLexer.test(""" "This is a string containing backslash \\b" """, "This is a string containing backslash \\b,<EOF>", 123))
+        self.assertTrue(TestLexer.test(""" "This is a string containing backslash \\b" """, "This is a string containing backslash \\b,<EOF>", 125))
     def test_string_literal_escape_formfeed(self):
-        self.assertTrue(TestLexer.test(""" "This is a string containing formfeed \\f" """, "This is a string containing formfeed \\f,<EOF>", 124))
+        self.assertTrue(TestLexer.test(""" "This is a string containing formfeed \\f" """, "This is a string containing formfeed \\f,<EOF>", 126))
     def test_string_literal_escape_newline(self):
-        self.assertTrue(TestLexer.test(""" "This is a string containing newline \\n New line here" """, "This is a string containing newline \\n New line here,<EOF>", 125))
+        self.assertTrue(TestLexer.test(""" "This is a string containing newline \\n New line here" """, "This is a string containing newline \\n New line here,<EOF>", 127))
     def test_string_backslash(self):
-        self.assertTrue(TestLexer.test(""" "This is a string containing \\\ backslash" """, "This is a string containing \\\ backslash,<EOF>", 126))
+        self.assertTrue(TestLexer.test(""" "This is a string containing \\\ backslash" """, "This is a string containing \\\ backslash,<EOF>", 128))
     def test_string_unclosed_string(self):
-        self.assertTrue(TestLexer.test(""" "This is an unclosed string """, "Unclosed String: This is an unclosed string ", 127))
+        self.assertTrue(TestLexer.test(""" "This is an unclosed string""", "Unclosed String: This is an unclosed string", 129))
+    def test_string_ill_escape(self):
+        self.assertTrue(TestLexer.test(""" "This is an illegal escape string \\a""", "Illegal Escape In String: This is an illegal escape string \\a", 130))
+    def test_array_literal(self):
+        self.assertTrue(TestLexer.test("[1, 2, 3] [2.3, 4.2, 102e3]", "[,1,,,2,,,3,],[,2.3,,,4.2,,,102e3,],<EOF>", 131))
+    def test_array_literal_empty(self):
+        self.assertTrue(TestLexer.test("[]", "[,],<EOF>", 132))
+    def test_primitive_boolean_type(self):
+        self.assertTrue(TestLexer.test("boolA && boolB || !boolC == boolD && boolE != boolF",
+        "boolA,&&,boolB,||,!,boolC,==,boolD,&&,boolE,!=,boolF,<EOF>",
+        133))

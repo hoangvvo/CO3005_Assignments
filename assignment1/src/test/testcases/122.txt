@@ -1,3 +1,1 @@
-
-"This is a string containing tab \t"
-"He asked me: \"Where is John?\""
+.12 143e 1.2e 1.2e- 1.2e+ 1.2e+e

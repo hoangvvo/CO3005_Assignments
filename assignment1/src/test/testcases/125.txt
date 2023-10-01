@@ -1,1 +1,1 @@
- "This is a string containing newline \n New line here" 
+ "This is a string containing backslash \b" 

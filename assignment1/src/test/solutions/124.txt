@@ -1,1 +1,1 @@
-This is a string containing formfeed \f,<EOF>
+This is a string containing tab \t,He asked me: \"Where is John?\",<EOF>

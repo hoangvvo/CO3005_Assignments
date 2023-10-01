@@ -41,6 +41,32 @@ method:
 param_list: param (CM param)*;
 param: ID (CM ID)* COLON data_type;
 
+// 5 Expressions
+expr:
+	LB expr RB
+	| <assoc = right> NEW ID LB (expr_list)? RB
+	| (ID DOT)? AT_ID (LB expr_list RB)?
+	| <assoc = left> expr DOT ID (LB expr_list RB)?
+	| expr LS expr RS
+	| <assoc = right> SUB_OP expr
+	| <assoc = right> NEGATE expr
+	| <assoc = left> expr (MUL_OP | DIV_OP | BACKSLASH | MOD_OP) expr
+	| <assoc = left> expr (ADD_OP | SUB_OP) expr
+	| <assoc = left> expr (AND | OR) expr
+	| expr (
+		EQUAL
+		| NOT_EQUAL
+		| LESS_THAN
+		| GREATER_THAN
+		| LESS_EQUAL
+		| GREATER_EQUAL
+	) expr
+	| expr POW_OP expr
+	| LIT
+	| SELF
+	| ID;
+expr_list: expr (CM expr)*;
+
 // 6 Statements 
 stmt:
 	dcl_stmt
@@ -73,32 +99,7 @@ method_invocation_stmt:
 // 6.9 Block statement
 block_stmt: LP stmt* RP;
 
-// 5 Expressions
-expr:
-	LB expr RB
-	| <assoc = right> NEW ID LB (expr_list)? RB
-	| (ID DOT)? AT_ID (LB expr_list RB)?
-	| <assoc = left> expr DOT ID (LB expr_list RB)?
-	| expr LS expr RS
-	| <assoc = right> SUB_OP expr
-	| <assoc = right> NEGATE expr
-	| <assoc = left> expr (MUL_OP | DIV_OP | BACKSLASH | MOD_OP) expr
-	| <assoc = left> expr (ADD_OP | SUB_OP) expr
-	| <assoc = left> expr (AND | OR) expr
-	| expr (
-		EQUAL
-		| NOT_EQUAL
-		| LESS_THAN
-		| GREATER_THAN
-		| LESS_EQUAL
-		| GREATER_EQUAL
-	) expr
-	| expr POW_OP expr
-	| LIT
-	| SELF
-	| ID;
-expr_list: expr (CM expr)*;
-
+// 4 Types and Value
 data_type: BOOL | INT | FLOAT | STRING | array_type;
 
 // 3.2 Program comment

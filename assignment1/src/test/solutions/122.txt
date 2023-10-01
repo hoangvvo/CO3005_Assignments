@@ -1,1 +1,1 @@
-This is a string containing tab \t,He asked me: \"Where is John?\",<EOF>
+.,12,143,e,1.2,e,1.2,e,-,1.2,e,+,1.2,e,+,e,<EOF>

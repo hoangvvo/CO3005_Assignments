@@ -1,1 +1,1 @@
- "This is an unclosed string 
+ "This is a string containing newline \n New line here" 
