@@ -18,25 +18,27 @@ classsuper: ID '<-';
 memdecl: attributedecl | methoddecl | constructormethod;
 
 // 2.2 Attribute declaration
-attributedecl: attribute_decl_body SEMI;
+attributedecl: attributedecl_body SEMI;
 
-attribute_decl_body: (CONST | VAR) (
-		attribute_decl_inner_with_init
-		| attribute_decl_inner_without_init
-	);
+attributedecl_body:
+	VAR (
+		attributedecl_inner_with_init
+		| attributedecl_inner_without_init
+	)
+	| CONST attributedecl_inner_with_init;
 
-attribute_decl_inner_without_init: (AT_ID | ID) (CM (AT_ID | ID))* COLON cslangtype;
+attributedecl_inner_without_init: (AT_ID | ID) (CM (AT_ID | ID))* COLON cslangtype;
 
-attribute_decl_inner_with_init: (AT_ID | ID) attribute_decl_inner_with_init_tail expr;
+attributedecl_inner_with_init: (AT_ID | ID) attributedecl_inner_with_init_tail expr;
 
-attribute_decl_inner_with_init_tail:
-	CM (AT_ID | ID) attribute_decl_inner_with_init_tail expr CM
+attributedecl_inner_with_init_tail:
+	CM (AT_ID | ID) attributedecl_inner_with_init_tail expr CM
 	| COLON cslangtype ASSIGN_OP;
 
 // 2.3 Method declaration
-constructormethod: FUNC CONSTRUCTOR LB paramlist? RB block_stmt;
+constructormethod: FUNC CONSTRUCTOR LB paramlist? RB blockstmt;
 methoddecl:
-	FUNC (AT_ID | ID) LB paramlist? RB COLON (cslangtype | VOID) block_stmt;
+	FUNC (AT_ID | ID) LB paramlist? RB COLON (cslangtype | VOID) blockstmt;
 paramlist: param (CM param)*;
 param: ID (CM ID)* COLON cslangtype;
 
@@ -52,10 +54,10 @@ ELSE: 'else';
 FOR: 'for';
 TRUE: 'true';
 FALSE: 'false';
-INT: 'int';
-FLOAT: 'float';
-BOOL: 'bool';
-STRING: 'string';
+INTTYPE: 'int';
+FLOATTYPE: 'float';
+BOOLTYPE: 'bool';
+STRINGTYPE: 'string';
 RETURN: 'return';
 NULL: 'null';
 CLASS: 'class';
@@ -117,25 +119,31 @@ STRING_LIT: '"' CHAR_LIT* '"' {self.text = self.text[1:-1]};
 // 3.7.5 Array Literals
 // 
 // not a literal: https://e-learning.hcmut.edu.vn/mod/forum/discuss.php?d=12968#p39025
-array_lit:
-	LS (INT_LIT | FLOAT_LIT | TRUE | FALSE | STRING_LIT)? (
-		CM (INT_LIT | FLOAT_LIT | TRUE | FALSE | STRING_LIT)
-	)* RS;
+array_lit: LS lit? (CM lit)* RS;
+
+lit: INT_LIT | FLOAT_LIT | TRUE | FALSE | STRING_LIT;
 
 // 4 Types and Value
-cslangtype: BOOL | INT | FLOAT | STRING | ARRAY_TYPE | ID;
+cslangtype:
+	BOOLTYPE
+	| INTTYPE
+	| FLOATTYPE
+	| STRINGTYPE
+	| arraytype
+	| ID;
 
 // 4.2 Array type
-fragment ELEMENT_TYPE: BOOL | INT | FLOAT | STRING;
-fragment INT_LIT_NON_ZERO: [1-9][0-9]*;
-ARRAY_TYPE: LS INT_LIT_NON_ZERO RS ELEMENT_TYPE;
+// 
+// ARRAYSIZE: [1-9][0-9]*;
+elementtype: BOOLTYPE | INTTYPE | FLOATTYPE | STRINGTYPE | ID;
+arraytype: LS INT_LIT RS elementtype;
 
 // 5 Expressions
 expr:
 	LB expr RB
-	| <assoc = right> NEW ID LB expr_list? RB
-	| (ID DOT)? AT_ID (LB expr_list? RB)?
-	| <assoc = left> expr DOT ID (LB expr_list? RB)?
+	| <assoc = right> NEW ID LB exprlist? RB
+	| (ID DOT)? AT_ID (LB exprlist? RB)?
+	| <assoc = left> expr DOT ID (LB exprlist? RB)?
 	| expr LS expr RS
 	| <assoc = right> SUB_OP expr
 	| <assoc = right> NEGATE expr
@@ -162,44 +170,44 @@ expr:
 	)
 	| SELF
 	| ID;
-expr_list: expr (CM expr)*;
+exprlist: expr (CM expr)*;
 
 // 6.1 Variable and Constant Declaration Statement
-dcl_stmt: attributedecl;
-// 6.2 Assignment Statement TODO: FIXME lhs assign_stmt
-assign_stmt_body: expr DECLARE_ASSIGN_OP expr;
-assign_stmt: assign_stmt_body SEMI;
+dclstmt: attributedecl;
+// 6.2 Assignment Statement TODO: FIXME lhs assignstmt
+assignstmt_body: expr DECLARE_ASSIGN_OP expr;
+assignstmt: assignstmt_body SEMI;
 // 6.3 If Statement
-if_stmt: IF block_stmt? expr block_stmt (ELSE block_stmt)?;
+ifstmt: IF blockstmt? expr blockstmt (ELSE blockstmt)?;
 // 6.4 For statement
-for_stmt_inner:
-	assign_stmt_body
-	| method_invocation_stmt_body
-	| attribute_decl_body;
-for_stmt:
-	FOR for_stmt_inner SEMI expr SEMI for_stmt_inner block_stmt;
+forstmt_inner:
+	assignstmt_body
+	| methodinvocationstmt_body
+	| attributedecl_body;
+forstmt:
+	FOR forstmt_inner SEMI expr SEMI forstmt_inner blockstmt;
 // 6.5 Break statement
-break_stmt: BREAK SEMI;
+breakstmt: BREAK SEMI;
 // 6.6 Continue statement
-continue_stmt: CONTINUE SEMI;
+continuestmt: CONTINUE SEMI;
 // 6.7 Return statement
-return_stmt: RETURN expr? SEMI;
+returnstmt: RETURN expr? SEMI;
 // 6.8 Method Invocation statement
-method_invocation_stmt_body:
-	expr DOT ID LB expr_list? RB
-	| (ID DOT)? AT_ID LB expr_list? RB;
-method_invocation_stmt: method_invocation_stmt_body SEMI;
+methodinvocationstmt_body:
+	expr DOT ID LB exprlist? RB
+	| (ID DOT)? AT_ID LB exprlist? RB;
+methodinvocationstmt: methodinvocationstmt_body SEMI;
 // 6.9 Block statement
-block_stmt:
+blockstmt:
 	LP (
-		dcl_stmt
-		| assign_stmt
-		| if_stmt
-		| for_stmt
-		| break_stmt
-		| continue_stmt
-		| return_stmt
-		| method_invocation_stmt
+		dclstmt
+		| assignstmt
+		| ifstmt
+		| forstmt
+		| breakstmt
+		| continuestmt
+		| returnstmt
+		| methodinvocationstmt
 	)* RP;
 
 // 3.3 Identifiers
