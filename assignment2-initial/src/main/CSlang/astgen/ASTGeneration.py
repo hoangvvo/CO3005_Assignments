@@ -80,14 +80,14 @@ class ASTGeneration(CSlangVisitor):
 
         # 
         idlst = [
-            ctx.AT_ID().getText() if ctx.AT_ID() else ctx.ID().getText()
+            Id(ctx.AT_ID().getText() if ctx.AT_ID() else ctx.ID().getText())
         ]
         exprlst = [
             self.visit(ctx.expr())
         ]
         cslangtype = None
         
-        arr = self.visitChildren(ctx)
+        arr = self.visit(ctx.attributedecl_inner_with_init_tail())
 
         for i in range(len(arr)):
             if (len(arr[i]) == 2):
@@ -97,21 +97,23 @@ class ASTGeneration(CSlangVisitor):
                 cslangtype = arr[i][0]
 
         return [
-            [Id(id), cslangtype, expr] for id, expr in zip(idlst, exprlst)
+            [id, cslangtype, expr] for id, expr in zip(idlst, exprlst)
         ]
 
 
     # Visit a parse tree produced by CSlangParser#attributedecl_inner_with_init_tail.
     def visitAttributedecl_inner_with_init_tail(self, ctx:CSlangParser.Attributedecl_inner_with_init_tailContext):
         if ctx.cslangtype():
-            return [self.visit(ctx.cslangtype())]
+            return [[
+                self.visit(ctx.cslangtype())
+            ]]
         else:
-            return [
+            return [[
                 Id(
                     ctx.AT_ID().getText() if ctx.AT_ID() else ctx.ID().getText()
                 ), 
                 self.visit(ctx.expr())
-            ]
+            ]] + self.visit(ctx.attributedecl_inner_with_init_tail())
 
 
     # Visit a parse tree produced by CSlangParser#constructormethod.
@@ -255,26 +257,26 @@ class ASTGeneration(CSlangVisitor):
         elif ctx.AT_ID(): # 2. FieldAccess() or CallExpr()
             if ctx.LB():
                 return CallExpr(
-                    Id(ctx.ID()) if ctx.ID() else None, # (ID DOT)?
+                    Id(ctx.ID().getText()) if ctx.ID() else None, # (ID DOT)?
                     Id(ctx.AT_ID().getText()),
                     self.visit(ctx.exprlist()) if ctx.exprlist() else []
                 )
             else:
                 return FieldAccess(
-                    Id(ctx.ID()) if ctx.ID() else None, # (ID DOT)?
+                    Id(ctx.ID().getText()) if ctx.ID() else None, # (ID DOT)?
                     Id(ctx.AT_ID().getText())
                 )
 
         elif ctx.DOT(): # 3. FieldAccess() or CallExpr()
             if ctx.LB():
                 return CallExpr(
-                    self.visit(ctx.expr()),
+                    self.visit(ctx.expr(0)),
                     Id(ctx.ID().getText()),
                     self.visit(ctx.exprlist()) if ctx.exprlist() else []
                 )
             else:
                 return FieldAccess(
-                    self.visit(ctx.expr()),
+                    self.visit(ctx.expr(0)),
                     Id(ctx.ID().getText())
                 )
 
@@ -333,8 +335,8 @@ class ASTGeneration(CSlangVisitor):
     # Visit a parse tree produced by CSlangParser#assignstmt_body.
     def visitAssignstmt_body(self, ctx:CSlangParser.Assignstmt_bodyContext) -> Assign:
         return Assign(
-            self.visit(ctx.expr()),
-            self.visit(ctx.expr())
+            self.visit(ctx.expr(0)),
+            self.visit(ctx.expr(1))
         )
 
 
@@ -380,13 +382,20 @@ class ASTGeneration(CSlangVisitor):
 
 
     # Visit a parse tree produced by CSlangParser#forstmt_inner.
-    def visitForstmt_inner(self, ctx:CSlangParser.Forstmt_innerContext):
-        return self.visitChildren(ctx)
+    def visitForstmt_inner(self, ctx:CSlangParser.Forstmt_innerContext) -> For:
+        return self.visit(
+            ctx.getChild(0)
+        )
 
 
     # Visit a parse tree produced by CSlangParser#forstmt.
-    def visitForstmt(self, ctx:CSlangParser.ForstmtContext):
-        return self.visitChildren(ctx)
+    def visitForstmt(self, ctx:CSlangParser.ForstmtContext) -> For:
+        return For(
+            self.visit(ctx.forstmt_inner(0)),
+            self.visit(ctx.expr()),
+            self.visit(ctx.forstmt_inner(1)),
+            self.visit(ctx.blockstmt())
+        )
 
 
     # Visit a parse tree produced by CSlangParser#breakstmt.
@@ -407,15 +416,15 @@ class ASTGeneration(CSlangVisitor):
 
 
     # Visit a parse tree produced by CSlangParser#methodinvocationstmt_body.
-    def visitMethodinvocationstmt_body(self, ctx:CSlangParser.Methodinvocationstmt_bodyContext) -> CallExpr:
+    def visitMethodinvocationstmt_body(self, ctx:CSlangParser.Methodinvocationstmt_bodyContext) -> CallStmt:
         if (ctx.AT_ID()):
-            return CallExpr(
+            return CallStmt(
                 Id(ctx.ID().getText()) if ctx.ID() else None,
                 Id(ctx.AT_ID().getText()),
                 self.visit(ctx.exprlist()) if ctx.exprlist() else []
             )
         else:
-            return CallExpr(
+            return CallStmt(
                 self.visit(ctx.expr()),
                 Id(ctx.ID().getText()),
                 self.visit(ctx.exprlist()) if ctx.exprlist() else []
@@ -423,7 +432,7 @@ class ASTGeneration(CSlangVisitor):
 
 
     # Visit a parse tree produced by CSlangParser#methodinvocationstmt.
-    def visitMethodinvocationstmt(self, ctx:CSlangParser.MethodinvocationstmtContext) -> CallExpr:
+    def visitMethodinvocationstmt(self, ctx:CSlangParser.MethodinvocationstmtContext) -> CallStmt:
         return self.visit(ctx.methodinvocationstmt_body())
 
 
