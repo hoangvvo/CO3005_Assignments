@@ -1735,16 +1735,12 @@ class Program {
         ]))
         self.assertTrue(TestAST.test(input, expect, 365))
 
-    def test_static_expr(self):
+    def test_static_access_expr(self):
         input = """
 class Program {
     func main(): void {
         A.@numOfShape := A.@numOfShape + 1;
         @numOfShape := @numOfShape + 1;
-        A.@test();
-        @test();
-        A.@test(a, b, c);
-        @test(a, b, c);
     }
 }
 """
@@ -1758,34 +1754,6 @@ class Program {
                     Assign(
                         FieldAccess(None, Id("@numOfShape")),
                         BinaryOp("+", FieldAccess(None, Id("@numOfShape")), IntLiteral(1))
-                    ),
-                    CallStmt(
-                        Id("A"),
-                        Id("@test"),
-                        []
-                    ),
-                    CallStmt(
-                        None,
-                        Id("@test"),
-                        []
-                    ),
-                    CallStmt(
-                        Id("A"),
-                        Id("@test"),
-                        [
-                            Id("a"),
-                            Id("b"),
-                            Id("c")
-                        ]
-                    ),
-                    CallStmt(
-                        None,
-                        Id("@test"),
-                        [
-                            Id("a"),
-                            Id("b"),
-                            Id("c")
-                        ]
                     )
                 ]))
             ])
@@ -1797,12 +1765,8 @@ class Program {
 class Program {
     func main(): void {
         A.numOfShape := A.numOfShape + 1;
-        x := A.test();
-        x := A.test(a, b, c);
-        x := arr[a+1].test();
-        x := arr[a+1].test(a, b.bar(), c + 1);
-        x := (a+b).test();
-        x := A.b.test();
+        x := B[1].numOfShape;
+        x := x.y.z.numOfShape;
     }
 }
 """
@@ -1815,68 +1779,17 @@ class Program {
                     ),
                     Assign(
                         Id("x"),
-                        CallExpr(
-                            Id("A"),
-                            Id("test"),
-                            []
-                        )
+                        FieldAccess(ArrayCell(Id("B"), IntLiteral(1)), Id("numOfShape"))
                     ),
                     Assign(
                         Id("x"),
-                        CallExpr(
-                            Id("A"),
-                            Id("test"),
-                            [
-                                Id("a"),
-                                Id("b"),
-                                Id("c")
-                            ]
-                        )
-                    ),
-                    Assign(
-                        Id("x"),
-                        CallExpr(
-                            ArrayCell(Id("arr"), BinaryOp("+", Id("a"), IntLiteral(1))),
-                            Id("test"),
-                            []
-                        )
-                    ),
-                    Assign(
-                        Id("x"),
-                        CallExpr(
-                            ArrayCell(Id("arr"), BinaryOp("+", Id("a"), IntLiteral(1))),
-                            Id("test"),
-                            [
-                                Id("a"),
-                                CallExpr(
-                                    Id("b"),
-                                    Id("bar"),
-                                    []
-                                ),
-                                BinaryOp("+", Id("c"), IntLiteral(1))
-                            ]
-                        )
-                    ),
-                    Assign(
-                        Id("x"),
-                        CallExpr(
-                            BinaryOp("+", Id("a"), Id("b")),
-                            Id("test"),
-                            []
-                        )
-                    ),
-                    Assign(
-                        Id("x"),
-                        CallExpr(
-                            FieldAccess(Id("A"), Id("b")),
-                            Id("test"),
-                            []
-                        )                    
+                        FieldAccess(FieldAccess(FieldAccess(Id("x"), Id("y")), Id("z")), Id("numOfShape"))
                     )
                 ]))
             ])
         ]))
         self.assertTrue(TestAST.test(input, expect, 367))
+
     def test_array_cell_expr(self):
         input = """
 class Program {
@@ -2328,3 +2241,680 @@ class Program {
             ])
         ]))
         self.assertTrue(TestAST.test(input, expect, 381))
+
+    def test_static_call(self):
+        input = """
+class Program {
+    func main(): void {
+        A.@test();
+        @test();
+        A.@test(a, b, c);
+        @test(a, b, c);
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    CallStmt(
+                        Id("A"),
+                        Id("@test"),
+                        []
+                    ),
+                    CallStmt(
+                        None,
+                        Id("@test"),
+                        []
+                    ),
+                    CallStmt(
+                        Id("A"),
+                        Id("@test"),
+                        [
+                            Id("a"),
+                            Id("b"),
+                            Id("c")
+                        ]
+                    ),
+                    CallStmt(
+                        None,
+                        Id("@test"),
+                        [
+                            Id("a"),
+                            Id("b"),
+                            Id("c")
+                        ]
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 382))
+
+    def test_instance_call(self):
+        input = """
+class Program {
+    func main(): void {
+        x := A.test();
+        x := A.test(a, b, c);
+        x := arr[a+1].test();
+        x := arr[a+1].test(a, b.bar(), c + 1);
+        x := (a+b).test();
+        x := A.b.test();
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    Assign(
+                        Id("x"),
+                        CallExpr(
+                            Id("A"),
+                            Id("test"),
+                            []
+                        )
+                    ),
+                    Assign(
+                        Id("x"),
+                        CallExpr(
+                            Id("A"),
+                            Id("test"),
+                            [
+                                Id("a"),
+                                Id("b"),
+                                Id("c")
+                            ]
+                        )
+                    ),
+                    Assign(
+                        Id("x"),
+                        CallExpr(
+                            ArrayCell(Id("arr"), BinaryOp("+", Id("a"), IntLiteral(1))),
+                            Id("test"),
+                            []
+                        )
+                    ),
+                    Assign(
+                        Id("x"),
+                        CallExpr(
+                            ArrayCell(Id("arr"), BinaryOp("+", Id("a"), IntLiteral(1))),
+                            Id("test"),
+                            [
+                                Id("a"),
+                                CallExpr(
+                                    Id("b"),
+                                    Id("bar"),
+                                    []
+                                ),
+                                BinaryOp("+", Id("c"), IntLiteral(1))
+                            ]
+                        )
+                    ),
+                    Assign(
+                        Id("x"),
+                        CallExpr(
+                            BinaryOp("+", Id("a"), Id("b")),
+                            Id("test"),
+                            []
+                        )
+                    ),
+                    Assign(
+                        Id("x"),
+                        CallExpr(
+                            FieldAccess(Id("A"), Id("b")),
+                            Id("test"),
+                            []
+                        )                    
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 383))
+
+    def test_complex_assignment_stmt(self):
+        input = """
+class Program {
+    func main(): void {
+        l[y.x(foo, @bar(a, 2), 3) + t.test()] := (1 + foo.bar() + @quz()) * 3;
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    Assign(
+                        ArrayCell(Id("l"), BinaryOp(
+                            "+", 
+                            CallExpr(Id("y"), Id("x"), [
+                                Id("foo"),
+                                CallExpr(None, Id("@bar"), [Id("a"), IntLiteral(2)]),
+                                IntLiteral(3)
+                            ]),
+                            CallExpr(Id("t"), Id("test"), [])
+                        )),
+                        BinaryOp("*", 
+                            BinaryOp(
+                                "+",
+                                BinaryOp(
+                                    "+",
+                                    IntLiteral(1),
+                                    CallExpr(Id("foo"), Id("bar"), [])
+                                ),
+                                CallExpr(None, Id("@quz"), [])
+                            ),
+                            IntLiteral(3)
+                        )
+
+                    ),
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 384))
+
+    def test_complex_assignment_stmt_2(self):
+        input = """
+class Program {
+    func main(): void {
+                self.foo.bar.quz := -(1 * test.foo.bar.quz);
+        @foo := 24 * 2;
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    Assign(
+                        FieldAccess(FieldAccess(FieldAccess(SelfLiteral(), Id("foo")), Id("bar")), Id("quz")),
+                        UnaryOp(
+                            "-", 
+                            BinaryOp(
+                                "*", 
+                                IntLiteral(1), 
+                                FieldAccess(FieldAccess(FieldAccess(Id("test"), Id("foo")), Id("bar")), Id("quz"))
+                            )
+                        )
+                    ),
+                    Assign(
+                        FieldAccess(None, Id("@foo")),
+                        BinaryOp("*", IntLiteral(24), IntLiteral(2))
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 385))
+
+    def test_const_declaration_statement_2(self):
+        input = """
+class A {
+    func main(): void {
+        const a: int = 1;
+        const @b: int = 2;
+    }
+}
+    """
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    ConstDecl(Id("a"), IntType(), IntLiteral(1)),
+                    ConstDecl(Id("@b"), IntType(), IntLiteral(2))
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 386))
+
+    def test_const_declaration_multiple_statement_2(self):
+        input = """
+class A {
+    func main(): void {
+        const a,b,c: int = 1,2,3;
+        const @d,@e,@f: int = 4,5,6;
+    }
+}
+    """
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    ConstDecl(Id("a"), IntType(), IntLiteral(1)),
+                    ConstDecl(Id("b"), IntType(), IntLiteral(2)),
+                    ConstDecl(Id("c"), IntType(), IntLiteral(3)),
+                    ConstDecl(Id("@d"), IntType(), IntLiteral(4)),
+                    ConstDecl(Id("@e"), IntType(), IntLiteral(5)),
+                    ConstDecl(Id("@f"), IntType(), IntLiteral(6))
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 387))
+
+
+    def test_var_declaration_statement_2(self):
+        input = """
+class A {
+    func main(): void {
+        var a: int;
+        var @b: int;
+    }
+}
+    """
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    VarDecl(Id("a"), IntType()),
+                    VarDecl(Id("@b"), IntType())
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 388))
+
+    def test_var_declaration_multiple_statement_2(self):
+        input = """
+class A {
+    func main(): void {
+        var a,b,c: int;
+        var @d,@e,@f: string;
+    }
+}
+    """
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    VarDecl(Id("a"), IntType()),
+                    VarDecl(Id("b"), IntType()),
+                    VarDecl(Id("c"), IntType()),
+                    VarDecl(Id("@d"), StringType()),
+                    VarDecl(Id("@e"), StringType()),
+                    VarDecl(Id("@f"), StringType())
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 389))
+
+    def test_var_declaration_with_init_statement_2(self):
+        input = """
+class A {
+    func main(): void {
+        var a,b,c: int = 1,2,3;
+        var @d,@e,@f: float = 4.0,5.0,6.0;
+    }
+}
+    """
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    VarDecl(Id("a"), IntType(), IntLiteral(1)),
+                    VarDecl(Id("b"), IntType(), IntLiteral(2)),
+                    VarDecl(Id("c"), IntType(), IntLiteral(3)),
+                    VarDecl(Id("@d"), FloatType(), FloatLiteral(4.0)),
+                    VarDecl(Id("@e"), FloatType(), FloatLiteral(5.0)),
+                    VarDecl(Id("@f"), FloatType(), FloatLiteral(6.0))
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 390))
+
+    def test_var_declaration_with_init_statement_complex(self):
+        input = """
+class A {
+    func main(): void {
+        var a: int = arr[0] * (test.foo() + @bar());
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    VarDecl(Id("a"), IntType(), BinaryOp("*", ArrayCell(Id("arr"), IntLiteral(0)), BinaryOp("+", CallExpr(Id("test"), Id("foo"), []), CallExpr(None, Id("@bar"), []))))
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 391))
+
+    def test_for_statement_complex(self):
+        input = """
+class A {
+    func foo(): void {
+        for @foo(); @bar(); @quz() {
+            io.@writeInt(i);
+        }
+
+        for i := foo.init(); i < x.len() - 5; i := i + 1 {
+            io.@writeInt(i);
+        }
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("foo"), [], VoidType(), Block([
+                    For(
+                        CallStmt(None, Id("@foo"), []),
+                        CallExpr(None, Id("@bar"), []),
+                        CallStmt(None, Id("@quz"), []),
+                        Block([
+                            CallStmt(
+                                Id("io"),
+                                Id("@writeInt"),
+                                [
+                                    Id("i")
+                                ]
+                            )
+                        ])
+                    ),
+                    For(
+                        Assign(Id("i"), CallExpr(Id("foo"), Id("init"), [])),
+                        BinaryOp("<", Id("i"), BinaryOp("-", CallExpr(Id("x"), Id("len"), []), IntLiteral(5))),
+                        Assign(Id("i"), BinaryOp("+", Id("i"), IntLiteral(1))),
+                        Block([
+                            CallStmt(
+                                Id("io"),
+                                Id("@writeInt"),
+                                [
+                                    Id("i")
+                                ]
+                            )
+                        ])
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 392))
+
+    def test_complex_return_statement(self):
+        input = """
+class A {
+    func foo(): int {
+        return 1 + 2 * 3;
+    }
+
+    func bar(): int {
+        return foo.bar();
+    }
+
+    func main(): void {
+        return @foo * (arr[5].test() + foo.bar());
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("A"), [
+                MethodDecl(Id("foo"), [], IntType(), Block([
+                    Return(
+                        BinaryOp("+", IntLiteral(1), BinaryOp("*", IntLiteral(2), IntLiteral(3)))
+                    )
+                ])),
+                MethodDecl(Id("bar"), [], IntType(), Block([
+                    Return(
+                        CallExpr(Id("foo"), Id("bar"), [])
+                    )
+                ])),
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    Return(
+                        BinaryOp("*", 
+                            FieldAccess(None, Id("@foo")),
+                            BinaryOp(
+                                "+",
+                                CallExpr(ArrayCell(Id("arr"), IntLiteral(5)), Id("test"), []),
+                                CallExpr(Id("foo"), Id("bar"), [])
+                            )
+                        )
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 393))
+
+    
+    def test_program_2(self):
+        input = """
+class Program {
+    func main(): void {
+        io.@writeString("Enter the number of shapes: ");
+        io.@readInt(@numOfShape);
+        @numOfShape := @numOfShape + 1;
+        io.@writeString("Number of shapes is: " ^ @numOfShape);
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    CallStmt(
+                        Id("io"),
+                        Id("@writeString"),
+                        [
+                            StringLiteral("Enter the number of shapes: ")
+                        ]
+                    ),
+                    CallStmt(
+                        Id("io"),
+                        Id("@readInt"),
+                        [
+                            FieldAccess(None, Id("@numOfShape"))
+                        ]
+                    ),
+                    Assign(
+                        FieldAccess(None, Id("@numOfShape")),
+                        BinaryOp("+", FieldAccess(None, Id("@numOfShape")), IntLiteral(1))
+                    ),
+                    CallStmt(
+                        Id("io"),
+                        Id("@writeString"),
+                        [
+                            BinaryOp("^", StringLiteral("Number of shapes is: "), FieldAccess(None, Id("@numOfShape")))
+                        ]
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 394))
+
+    def test_function_return_type(self):
+        input = """
+class Program {
+    func intfunction(): int {
+    }
+    func floatfunction(): float {
+    }
+    func stringfunction(): string {
+    }
+    func boolfunction(): bool {
+    }
+    func voidfunction(): void {
+    }
+    func arrayfunction(): [5]int {
+    }
+    func objectfunction(): A {
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("intfunction"), [], IntType(), Block([])),
+                MethodDecl(Id("floatfunction"), [], FloatType(), Block([])),
+                MethodDecl(Id("stringfunction"), [], StringType(), Block([])),
+                MethodDecl(Id("boolfunction"), [], BoolType(), Block([])),
+                MethodDecl(Id("voidfunction"), [], VoidType(), Block([])),
+                MethodDecl(Id("arrayfunction"), [], ArrayType(5, IntType()), Block([])),
+                MethodDecl(Id("objectfunction"), [], ClassType(Id("A")), Block([]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 395))
+
+    def test_array_assignment_complex(self):
+        input = """
+class Program {
+    func main(): void {
+        arr[1][2][3] := 1;
+        arr[1][2][3] := 1.0;
+        arr[1][2][3] := "string";
+        arr[1][2][3] := true;
+        arr[1][2][3] := arr[1][2][3];
+        arr[1][2][3] := arr[1][2][3].foo();
+        arr[1][2][3] := arr[1][2][3].foo(1,2,3);
+        arr[1][2][3] := arr[1][2][3].foo(1,2,3).bar();
+        arr[1][2][3] := arr[1][2][3].foo(1,2,3).bar(1,2,3);
+        arr[1][2][3] := arr[1][2][3].foo(1,2,3).bar(1,2,3).quz();
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        IntLiteral(1)
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        FloatLiteral(1.0)
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        StringLiteral("string")
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        BooleanLiteral(True)
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3))
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        CallExpr(ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)), Id("foo"), [])
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        CallExpr(ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)), Id("foo"), [IntLiteral(1), IntLiteral(2), IntLiteral(3)])
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        CallExpr(CallExpr(ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)), Id("foo"), [IntLiteral(1), IntLiteral(2), IntLiteral(3)]), Id("bar"), [])
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        CallExpr(CallExpr(ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)), Id("foo"), [IntLiteral(1), IntLiteral(2), IntLiteral(3)]), Id("bar"), [IntLiteral(1), IntLiteral(2), IntLiteral(3)])
+                    ),
+                    Assign(
+                        ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)),
+                        CallExpr(CallExpr(CallExpr(ArrayCell(ArrayCell(ArrayCell(Id("arr"), IntLiteral(1)), IntLiteral(2)), IntLiteral(3)), Id("foo"), [IntLiteral(1), IntLiteral(2), IntLiteral(3)]), Id("bar"), [IntLiteral(1), IntLiteral(2), IntLiteral(3)]), Id("quz"), [])
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 396))
+
+    def test_complex_new_expr(self):
+        input = """
+class Program {
+    func main(): void {
+        x := new Foo(
+            arr[4],
+            new Bar(),
+            3
+        );
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    Assign(
+                        Id("x"),
+                        NewExpr(
+                            Id("Foo"),
+                            [
+                                ArrayCell(Id("arr"), IntLiteral(4)),
+                                NewExpr(Id("Bar"), []),
+                                IntLiteral(3)
+                            ]
+                        )
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 397))
+
+    def test_complex_new_expr_2(self):
+        input = """
+class Program {
+    func main(): void {
+        x := new Foo(
+            arr[4],
+            new Bar(
+                new Quz(),
+                3
+            ),
+            3
+        );
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("main"), [], VoidType(), Block([
+                    Assign(
+                        Id("x"),
+                        NewExpr(
+                            Id("Foo"),
+                            [
+                                ArrayCell(Id("arr"), IntLiteral(4)),
+                                NewExpr(
+                                    Id("Bar"),
+                                    [
+                                        NewExpr(Id("Quz"), []),
+                                        IntLiteral(3)
+                                    ]
+                                ),
+                                IntLiteral(3)
+                            ]
+                        )
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 398))
+
+    def test_program_3(self):
+        input = """
+class Program {
+    func constructor() {
+        io.@writeString("Enter the number of shapes: ");
+        io.@readInt(@numOfShape);
+        @numOfShape := @numOfShape + 1;
+        io.@writeString("Number of shapes is: " ^ @numOfShape);
+    }
+}
+"""
+        expect = str(Program([
+            ClassDecl(Id("Program"), [
+                MethodDecl(Id("constructor"), [], None, Block([
+                    CallStmt(
+                        Id("io"),
+                        Id("@writeString"),
+                        [
+                            StringLiteral("Enter the number of shapes: ")
+                        ]
+                    ),
+                    CallStmt(
+                        Id("io"),
+                        Id("@readInt"),
+                        [
+                            FieldAccess(None, Id("@numOfShape"))
+                        ]
+                    ),
+                    Assign(
+                        FieldAccess(None, Id("@numOfShape")),
+                        BinaryOp("+", FieldAccess(None, Id("@numOfShape")), IntLiteral(1))
+                    ),
+                    CallStmt(
+                        Id("io"),
+                        Id("@writeString"),
+                        [
+                            BinaryOp("^", StringLiteral("Number of shapes is: "), FieldAccess(None, Id("@numOfShape")))
+                        ]
+                    )
+                ]))
+            ])
+        ]))
+        self.assertTrue(TestAST.test(input, expect, 399))
+        
