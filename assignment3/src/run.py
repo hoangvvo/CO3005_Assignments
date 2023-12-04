@@ -4,41 +4,71 @@ import subprocess
 import unittest
 from antlr4 import *
 
-for path in ['./test/', './main/CSlang/parser/', './main/CSlang/utils/','./main/CSlang/astgen/','./main/CSlang/checker']:
+for path in [
+    "./test/",
+    "./main/CSlang/parser/",
+    "./main/CSlang/utils/",
+    "./main/CSlang/astgen/",
+    "./main/CSlang/checker",
+]:
     sys.path.append(path)
-ANTLR_JAR = os.environ.get('ANTLR_JAR')
-TARGET_DIR = '../target'
-GENERATE_DIR = 'main/CSlang/parser'
+ANTLR_JAR = "antlr4-4.9.2-complete.jar"
+TARGET_DIR = "../target"
+GENERATE_DIR = "main/CSlang/parser"
 
 
 def main(argv):
     if len(argv) < 1:
         printUsage()
-    elif argv[0] == 'gen':
-        subprocess.run(["java", "-jar", ANTLR_JAR, "-o", "../target",
-                       "-no-listener", "-visitor", "main/CSlang/parser/CSlang.g4"])
-    elif argv[0] == 'clean':
+    elif argv[0] == "gen":
+        subprocess.run(
+            [
+                "java",
+                "-jar",
+                ANTLR_JAR,
+                "-o",
+                "../target",
+                "-no-listener",
+                "-visitor",
+                "main/CSlang/parser/CSlang.g4",
+            ]
+        )
+    elif argv[0] == "clean":
         subprocess.run(["rm", "-rf", TARGET_DIR + "/*"])
 
-    elif argv[0] == 'test':
+    elif argv[0] == "test":
         if not os.path.isdir(TARGET_DIR + "/" + GENERATE_DIR):
-            subprocess.run(["java", "-jar", ANTLR_JAR, "-o", GENERATE_DIR,
-                           "-no-listener", "-visitor", "main/CSlang/parser/CSlang.g4"])
+            subprocess.run(
+                [
+                    "java",
+                    "-jar",
+                    ANTLR_JAR,
+                    "-o",
+                    GENERATE_DIR,
+                    "-no-listener",
+                    "-visitor",
+                    "main/CSlang/parser/CSlang.g4",
+                ]
+            )
         if not (TARGET_DIR + "/" + GENERATE_DIR) in sys.path:
             sys.path.append(TARGET_DIR + "/" + GENERATE_DIR)
         if len(argv) < 2:
             printUsage()
-        elif argv[1] == 'LexerSuite':
+        elif argv[1] == "LexerSuite":
             from LexerSuite import LexerSuite
+
             getAndTest(LexerSuite)
-        elif argv[1] == 'ParserSuite':
+        elif argv[1] == "ParserSuite":
             from ParserSuite import ParserSuite
+
             getAndTest(ParserSuite)
-        elif argv[1] == 'ASTGenSuite':
+        elif argv[1] == "ASTGenSuite":
             from ASTGenSuite import ASTGenSuite
+
             getAndTest(ASTGenSuite)
-        elif argv[1] == 'CheckSuite':
-            from  CheckSuite  import CheckSuite
+        elif argv[1] == "CheckSuite":
+            from CheckSuite import CheckSuite
+
             getAndTest(CheckSuite)
         else:
             printUsage()
@@ -54,14 +84,15 @@ def getAndTest(cls):
 def test(suite):
     from pprint import pprint
     from io import StringIO
+
     stream = StringIO()
     runner = unittest.TextTestRunner(stream=stream)
     result = runner.run(suite)
-    print('Tests run ', result.testsRun)
-    print('Errors ', result.errors)
+    print("Tests run ", result.testsRun)
+    print("Errors ", result.errors)
     pprint(result.failures)
     stream.seek(0)
-    print('Test output\n', stream.read())
+    print("Test output\n", stream.read())
 
 
 def printUsage():

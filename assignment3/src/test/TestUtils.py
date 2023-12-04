@@ -2,13 +2,17 @@ import sys
 import os
 from antlr4 import *
 from antlr4.error.ErrorListener import ConsoleErrorListener, ErrorListener
-if not './main/CSlang/parser/' in sys.path:
-    sys.path.append('./main/CSlang/parser/')
-if os.path.isdir('../target/main/CSlang/parser') and not '../target/main/CSlang/parser/' in sys.path:
-    sys.path.append('../target/main/CSlang/parser/')
+
+if not "./main/CSlang/parser/" in sys.path:
+    sys.path.append("./main/CSlang/parser/")
+if (
+    os.path.isdir("../target/main/CSlang/parser")
+    and not "../target/main/CSlang/parser/" in sys.path
+):
+    sys.path.append("../target/main/CSlang/parser/")
 from CSlangLexer import CSlangLexer
 from CSlangParser import CSlangParser
-from ASTGeneration import  ASTGeneration
+from ASTGeneration import ASTGeneration
 from StaticCheck import StaticChecker
 from StaticError import StaticError
 from lexererr import *
@@ -55,7 +59,7 @@ class TestLexer:
     def printLexeme(dest, lexer):
         tok = lexer.nextToken()
         if tok.type != Token.EOF:
-            dest.write(tok.text+",")
+            dest.write(tok.text + ",")
             TestLexer.printLexeme(dest, lexer)
         else:
             dest.write("<EOF>")
@@ -65,8 +69,14 @@ class NewErrorListener(ConsoleErrorListener):
     INSTANCE = None
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        raise SyntaxException("Error on line " + str(line) +
-                              " col " + str(column) + ": " + offendingSymbol.text)
+        raise SyntaxException(
+            "Error on line "
+            + str(line)
+            + " col "
+            + str(column)
+            + ": "
+            + offendingSymbol.text
+        )
 
 
 NewErrorListener.INSTANCE = NewErrorListener()
@@ -147,6 +157,10 @@ class TestChecker:
         TestChecker.check(SOL_DIR, asttree, num)
         dest = open(os.path.join(SOL_DIR, str(num) + ".txt"), "r")
         line = dest.read()
+        if line != expect:
+            print("Error at test case " + str(num) + ":")
+            print("Expected:    " + expect)
+            print("But found:   " + line)
         return line == expect
 
     @staticmethod
@@ -162,7 +176,7 @@ class TestChecker:
             dest.close()
 
 
-class TestCodeGen():
+class TestCodeGen:
     @staticmethod
     def test(input, expect, num):
         if type(input) is str:
@@ -192,17 +206,24 @@ class TestCodeGen():
         try:
             codeGen.gen(asttree, path)
 
-            subprocess.call("java  -jar " + JASMIN_JAR + " " + path +
-                            "/MT22Class.j", shell=True, stderr=subprocess.STDOUT)
+            subprocess.call(
+                "java  -jar " + JASMIN_JAR + " " + path + "/MT22Class.j",
+                shell=True,
+                stderr=subprocess.STDOUT,
+            )
 
-            subprocess.run("java -cp ./lib:. MT22Class",
-                           shell=True, stdout=f, timeout=10)
+            subprocess.run(
+                "java -cp ./lib:. MT22Class", shell=True, stdout=f, timeout=10
+            )
         except StaticError as e:
             f.write(str(e))
         except subprocess.TimeoutExpired:
             f.write("Time out\n")
         except subprocess.CalledProcessError as e:
-            raise RuntimeError("command '{}' return with error (code {}): {}".format(
-                e.cmd, e.returncode, e.output))
+            raise RuntimeError(
+                "command '{}' return with error (code {}): {}".format(
+                    e.cmd, e.returncode, e.output
+                )
+            )
         finally:
             f.close()
