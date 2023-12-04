@@ -10,21 +10,21 @@ import copy
 
 
 class Member:
-    def __init__(self, n, t, isMu=False):
-        self.name: str = n
-        self.typ: Type = t
-        self.isMu: bool = isMu
+    def __init__(self, n: str, t: Type, isMu=False):
+        self.name = n
+        self.typ = t
+        self.isMu = isMu
 
     def __str__(self):
         return "Member(" + self.name + "," + str(self.typ) + "," + str(self.isMu) + ")"
 
 
 class BKClass(Utils):
-    def __init__(self, n, p, m, c=None):
-        self.name: str = n
+    def __init__(self, n: str, p, m, c=None):
+        self.name = n
         self.parent = p
-        self.member: list(Member) = m
-        self.constructors: list(Member) = c
+        self.member = m
+        self.constructors = c
 
     def __str__(self):
         return (
@@ -43,7 +43,7 @@ class BKClass(Utils):
             + "])"
         )
 
-    def get_constructors(self) -> list(Member):
+    def get_constructors(self):
         if self.constructors is None:
             return []
         return self.constructors
@@ -77,7 +77,7 @@ class GetEnv(BaseVisitor, Utils):
             # 2.1 Redeclared Variable/Constant/Attribute/Class/Method/Parameter
             raise Redeclared(Class(), ast.classname.name)
 
-        mem: list(Member) = reduce(lambda a, e: self.visit(e, a), ast.memlist, [])
+        mem = reduce(lambda a, e: self.visit(e, a), ast.memlist, [])
 
         memlist = []
         constructors = []
@@ -203,7 +203,7 @@ class ScopeStack(Utils):
         for i in range(len(self.stack) - 1, -1, -1):
             if self.stack[i].rettype is not None:
                 return self.stack[i].rettype
-        return None
+        raise Exception("No return type found")
 
 
 class StaticChecker(BaseVisitor, Utils):
@@ -246,7 +246,7 @@ class StaticChecker(BaseVisitor, Utils):
         for x in ast.decl:
             self.visit(x, globalEnv)
 
-    def visitClassDecl(self, ast: ClassDecl, env: list(BKClass)):
+    def visitClassDecl(self, ast: ClassDecl, env):
         self.scope_stack.enter_scope()
 
         if ast.parentname is not None:
@@ -261,11 +261,11 @@ class StaticChecker(BaseVisitor, Utils):
 
         self.scope_stack.exit_scope()
 
-    def visitAttributeDecl(self, ast: AttributeDecl, env: list(BKClass)):
+    def visitAttributeDecl(self, ast: AttributeDecl, env):
         self.visit(ast.decl, env)
 
-    def visitMethodDecl(self, ast: MethodDecl, env: list(BKClass)):
-        self.scope_stack.enter_scope()
+    def visitMethodDecl(self, ast: MethodDecl, env):
+        self.scope_stack.enter_scope(rettype=ast.returnType)
 
         for x in ast.param:
             self.visit(x, env)
@@ -274,7 +274,7 @@ class StaticChecker(BaseVisitor, Utils):
 
         self.scope_stack.exit_scope()
 
-    def visitVarDecl(self, ast: VarDecl, env: list(BKClass)):
+    def visitVarDecl(self, ast: VarDecl, env):
         if self.scope_stack.find_in_scope(ast.variable.name) is not None:
             # 2.1 Redeclared Variable/Constant/Attribute/Class/Method/Parameter
             raise Redeclared(Variable(), ast.variable.name)
@@ -284,19 +284,20 @@ class StaticChecker(BaseVisitor, Utils):
             # The type of a variable, constant, parameter or attribute cannot be void
             raise TypeMismatchInDeclaration(ast)
 
-        value_typ = self.visit(ast.varInit, env)[0]
-        if not self.__check_type_compatible(ast.varType, value_typ, env):
-            # 2.6 Type Mismatch In Declaration
-            # If there is the initialization expression in a variable/
-            # constant/attribute declaration, the
-            # type of the declaration and initialization expression must
-            # # conform the type rule for an
-            # assignment described above.
-            raise TypeMismatchInDeclaration(ast)
+        if ast.varInit is not None:
+            var_init_type = self.visit(ast.varInit, env)[0]
+            if not self.__check_type_compatible(ast.varType, var_init_type, env):
+                # 2.6 Type Mismatch In Declaration
+                # If there is the initialization expression in a variable/
+                # constant/attribute declaration, the
+                # type of the declaration and initialization expression must
+                # # conform the type rule for an
+                # assignment described above.
+                raise TypeMismatchInDeclaration(ast)
 
         self.scope_stack.add_to_scope(ast.variable.name, ast.varType, False)
 
-    def visitConstDecl(self, ast: ConstDecl, env: list(BKClass)):
+    def visitConstDecl(self, ast: ConstDecl, env):
         # 2.1 Redeclared Variable/Constant/Attribute/Class/Method/Parameter
         if self.scope_stack.find_in_scope(ast.constant.name) is not None:
             raise Redeclared(Constant(), ast.constant.name)
@@ -323,28 +324,28 @@ class StaticChecker(BaseVisitor, Utils):
 
         self.scope_stack.add_to_scope(ast.constant.name, ast.constType, True)
 
-    def visitIntType(self, ast: IntType, env: list(BKClass)):
+    def visitIntType(self, ast: IntType, env):
         return (StaticChecker.inttype, True)
 
-    def visitFloatType(self, ast: FloatType, env: list(BKClass)):
+    def visitFloatType(self, ast: FloatType, env):
         return (StaticChecker.floattype, True)
 
-    def visitBoolType(self, ast: BoolType, env: list(BKClass)):
+    def visitBoolType(self, ast: BoolType, env):
         return (StaticChecker.booltype, True)
 
-    def visitStringType(self, ast: StringType, env: list(BKClass)):
+    def visitStringType(self, ast: StringType, env):
         return (StaticChecker.stringtype, True)
 
-    def visitVoidType(self, ast: VoidType, env: list(BKClass)):
+    def visitVoidType(self, ast: VoidType, env):
         return (StaticChecker.voidtype, True)
 
-    def visitArrayType(self, ast: ArrayType, env: list(BKClass)):
+    def visitArrayType(self, ast: ArrayType, env):
         return (ast, True)
 
-    def visitClassType(self, ast: ClassType, env: list(BKClass)):
+    def visitClassType(self, ast: ClassType, env):
         return (ast, True)
 
-    def visitBinaryOp(self, ast: BinaryOp, env: list(BKClass)):
+    def visitBinaryOp(self, ast: BinaryOp, env):
         left = self.visit(ast.left, env)[0]
         right = self.visit(ast.right, env)[0]
         op = ast.op
@@ -406,7 +407,7 @@ class StaticChecker(BaseVisitor, Utils):
 
         raise TypeMismatchInExpression(ast)
 
-    def visitUnaryOp(self, ast: UnaryOp, env: list(BKClass)):
+    def visitUnaryOp(self, ast: UnaryOp, env):
         body = self.visit(ast.body, env)[0]
         op = ast.op
 
@@ -419,7 +420,7 @@ class StaticChecker(BaseVisitor, Utils):
                 raise TypeMismatchInExpression(ast)
             return (StaticChecker.booltype, True)
 
-    def visitCallExpr(self, ast: CallExpr, env: list(BKClass)):
+    def visitCallExpr(self, ast: CallExpr, env):
         member: Member = None
         if ast.obj is None:
             # static method call
@@ -468,7 +469,7 @@ class StaticChecker(BaseVisitor, Utils):
 
         return (member_typ.rettype, True)
 
-    def visitNewExpr(self, ast: NewExpr, env: list(BKClass)):
+    def visitNewExpr(self, ast: NewExpr, env):
         typ: ClassType = self.scope_stack.find_in_all_scope(ast.classname.name)[0]
         if type(typ) is not ClassType:
             # 2.5 Type Mismatch In Expression
@@ -497,14 +498,14 @@ class StaticChecker(BaseVisitor, Utils):
 
         raise TypeMismatchInExpression(ast)
 
-    def visitId(self, ast: Id, env: list(BKClass)):
+    def visitId(self, ast: Id, env):
         res = self.scope_stack.find_in_all_scope(ast.name)
         if res is None:
             # 2.2 Undeclared Identifier/Attribute/Method/Class
             raise Undeclared(Identifier(), ast.name)
         return res[0], res[1]
 
-    def visitArrayCell(self, ast: ArrayCell, env: list(BKClass)):
+    def visitArrayCell(self, ast: ArrayCell, env):
         arr_type: ArrayType = self.visit(ast.arr, env)[0]
         if type(arr_type) != ArrayType:
             # 2.5 Type Mismatch In Expression
@@ -518,7 +519,7 @@ class StaticChecker(BaseVisitor, Utils):
 
         return (arr_type.eleType, False)
 
-    def visitFieldAccess(self, ast: FieldAccess, env: list(BKClass)):
+    def visitFieldAccess(self, ast: FieldAccess, env):
         member: Member = None
         if ast.obj is None:
             # this is static member access, field name is an "at" identifier
@@ -557,11 +558,11 @@ class StaticChecker(BaseVisitor, Utils):
 
         return (member.typ, not member.isMu)
 
-    def visitBlock(self, ast: Block, env: list(BKClass)):
+    def visitBlock(self, ast: Block, env):
         for x in ast.stmt:
             self.visit(x, env)
 
-    def visitIf(self, ast: If, env: list(BKClass)):
+    def visitIf(self, ast: If, env):
         # FIXME: understand if preStmt scope context
         if ast.preStmt is not None:
             self.visit(ast.preStmt, env)
@@ -581,7 +582,7 @@ class StaticChecker(BaseVisitor, Utils):
             self.visit(ast.elseStmt, env)
             self.scope_stack.exit_scope()
 
-    def visitFor(self, ast: For, env: list(BKClass)):
+    def visitFor(self, ast: For, env):
         self.visit(ast.initStmt, env)
 
         cond_type = self.visit(ast.expr, env)[0]
@@ -596,26 +597,35 @@ class StaticChecker(BaseVisitor, Utils):
         self.visit(ast.loop, env)
         self.scope_stack.exit_scope()
 
-    def visitContinue(self, ast: Continue, env: list(BKClass)):
+    def visitContinue(self, ast: Continue, env):
         # 2.7 Break/Continue not in loop
         if not self.scope_stack.is_in_loop():
             raise MustInLoop(ast)
 
-    def visitBreak(self, ast: Break, env: list(BKClass)):
+    def visitBreak(self, ast: Break, env):
         # 2.7 Break/Continue not in loop
         if not self.scope_stack.is_in_loop():
             raise MustInLoop(ast)
 
-    def visitReturn(self, ast: Return, env: list(BKClass)):
-        expr_type = self.visit(ast.expr, env)[0]
+    def visitReturn(self, ast: Return, env):
         current_rettype = self.scope_stack.get_current_rettype()
-        if self.__check_type_compatible(current_rettype, expr_type, env):
+
+        if ast.expr is None:
+            # 2.4 Type Mismatch In Statement
+            # For a return statement, the return expression can be considered
+            # as RHS of an implicit assignment whose LHS is the return type.
+            if type(current_rettype) is not VoidType:
+                raise TypeMismatchInStatement(ast)
+            return
+
+        expr_type = self.visit(ast.expr, env)[0]
+        if not self.__check_type_compatible(current_rettype, expr_type, env):
             # 2.4 Type Mismatch In Statement
             # For a return statement, the return expression can be considered
             # as RHS of an implicit assignment whose LHS is the return type.
             raise TypeMismatchInStatement(ast)
 
-    def visitAssign(self, ast: Assign, env: list(BKClass)):
+    def visitAssign(self, ast: Assign, env):
         (lhs_type, is_const) = self.visit(ast.lhs, env)
         if is_const:
             # 2.3 Cannot Assign To Constant
@@ -626,7 +636,7 @@ class StaticChecker(BaseVisitor, Utils):
             # 2.4 Type Mismatch In Statement
             raise TypeMismatchInStatement(ast)
 
-    def visitCallStmt(self, ast: CallStmt, env: list(BKClass)):
+    def visitCallStmt(self, ast: CallStmt, env):
         member: Member = None
         if ast.obj is None:
             # static method call
@@ -676,26 +686,26 @@ class StaticChecker(BaseVisitor, Utils):
 
         return (member_typ.rettype, True)
 
-    def visitIntLiteral(self, ast: IntLiteral, env: list(BKClass)):
+    def visitIntLiteral(self, ast: IntLiteral, env):
         return (StaticChecker.inttype, True)
 
-    def visitFloatLiteral(self, ast: FloatLiteral, env: list(BKClass)):
+    def visitFloatLiteral(self, ast: FloatLiteral, env):
         return (StaticChecker.floattype, True)
 
-    def visitBooleanLiteral(self, ast: BooleanLiteral, env: list(BKClass)):
+    def visitBooleanLiteral(self, ast: BooleanLiteral, env):
         return (StaticChecker.booltype, True)
 
-    def visitStringLiteral(self, ast: StringLiteral, env: list(BKClass)):
+    def visitStringLiteral(self, ast: StringLiteral, env):
         return (StaticChecker.stringtype, True)
 
-    def visitNullLiteral(self, ast: NullLiteral, env: list(BKClass)):
+    def visitNullLiteral(self, ast: NullLiteral, env):
         return (ClassType("null"), True)
 
-    def visitSelfLiteral(self, ast: SelfLiteral, env: list(BKClass)):
+    def visitSelfLiteral(self, ast: SelfLiteral, env):
         current_classname = self.scope_stack.get_current_classname()
         return (ClassType(Id(current_classname)), True)
 
-    def visitArrayLiteral(self, ast: ArrayLiteral, env: list(BKClass)):
+    def visitArrayLiteral(self, ast: ArrayLiteral, env):
         elem_typs = list(map(lambda x: self.visit(x, env)[0], ast.value))
 
         # Illegal Array Literal
@@ -708,7 +718,7 @@ class StaticChecker(BaseVisitor, Utils):
 
         return (ArrayType(len(ast.value), elem_typ), True)
 
-    def __check_entrypoint(self, env: list(BKClass)):
+    def __check_entrypoint(self, env):
         # There must be a function whose name is @main without any parameter and
         # return nothing in the class named Program in a CSlang program.
         program_bkclass: BKClass = self.lookup("Program", env, lambda x: x.name)
@@ -725,9 +735,7 @@ class StaticChecker(BaseVisitor, Utils):
         ):
             raise NoEntryPoint()
 
-    def __check_type_compatible(
-        self, lhs_type: Type, rhs_type: Type, env: list(BKClass)
-    ):
+    def __check_type_compatible(self, lhs_type: Type, rhs_type: Type, env):
         # check coercion (spec - 5.10 Type coercions)
 
         if type(lhs_type) == type(rhs_type):
