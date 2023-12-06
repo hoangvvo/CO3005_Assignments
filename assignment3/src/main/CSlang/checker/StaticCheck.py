@@ -151,7 +151,8 @@ class Scope(Utils):
     def add(self, name, typ, is_const=False):
         if is_const:
             self.const[name] = typ
-        self.var[name] = typ
+        else:
+            self.var[name] = typ
 
     def get(self, name):
         varGet = self.var.get(name, None)
@@ -175,15 +176,14 @@ class ScopeStack(Utils):
         self.stack.pop()
 
     def add_to_scope(self, name: str, typ: Type, is_const: bool):
-        self.stack[-1].add(name, typ, is_const)
+        self.stack[-1].add(name, typ, is_const=is_const)
 
     def find_in_scope(self, name) -> (Type, bool):
         return self.stack[-1].get(name)
 
     def is_in_loop(self):
-        # return self.stack[-1].isLoop
         for i in range(len(self.stack) - 1, -1, -1):
-            if self.stack[i].isLoop:
+            if self.stack[i].is_loop:
                 return True
         return False
 
@@ -247,7 +247,7 @@ class StaticChecker(BaseVisitor, Utils):
             self.visit(x, globalEnv)
 
     def visitClassDecl(self, ast: ClassDecl, env):
-        self.scope_stack.enter_scope()
+        self.scope_stack.enter_scope(classname=ast.classname.name)
 
         if ast.parentname is not None:
             parent_class = self.lookup(ast.parentname.name, env, lambda x: x.name)
@@ -284,6 +284,14 @@ class StaticChecker(BaseVisitor, Utils):
             # The type of a variable, constant, parameter or attribute cannot be void
             raise TypeMismatchInDeclaration(ast)
 
+        if type(ast.varType) is ClassType:
+            bkclass: BKClass = self.lookup(
+                ast.varType.classname.name, env, lambda x: x.name
+            )
+            if bkclass is None:
+                # 2.2 Undeclared Identifier/Attribute/Method/Class
+                raise Undeclared(Class(), ast.varType.classname.name)
+
         if ast.varInit is not None:
             var_init_type = self.visit(ast.varInit, env)[0]
             if not self.__check_type_compatible(ast.varType, var_init_type, env):
@@ -295,7 +303,7 @@ class StaticChecker(BaseVisitor, Utils):
                 # assignment described above.
                 raise TypeMismatchInDeclaration(ast)
 
-        self.scope_stack.add_to_scope(ast.variable.name, ast.varType, False)
+        self.scope_stack.add_to_scope(ast.variable.name, ast.varType, is_const=False)
 
     def visitConstDecl(self, ast: ConstDecl, env):
         # 2.1 Redeclared Variable/Constant/Attribute/Class/Method/Parameter
@@ -312,6 +320,14 @@ class StaticChecker(BaseVisitor, Utils):
             # The type of a variable, constant, parameter or attribute cannot be void
             raise TypeMismatchInDeclaration(ast)
 
+        if type(ast.constType) is ClassType:
+            bkclass: BKClass = self.lookup(
+                ast.varType.classname.name, env, lambda x: x.name
+            )
+            if bkclass is None:
+                # 2.2 Undeclared Identifier/Attribute/Method/Class
+                raise Undeclared(Class(), ast.constType.classname.name)
+
         value_typ = self.visit(ast.value, env)[0]
         if not self.__check_type_compatible(ast.constType, value_typ, env):
             # 2.6 Type Mismatch In Declaration
@@ -322,7 +338,7 @@ class StaticChecker(BaseVisitor, Utils):
             # assignment described above.
             raise TypeMismatchInDeclaration(ast)
 
-        self.scope_stack.add_to_scope(ast.constant.name, ast.constType, True)
+        self.scope_stack.add_to_scope(ast.constant.name, ast.constType, is_const=True)
 
     def visitIntType(self, ast: IntType, env):
         return (StaticChecker.inttype, True)
@@ -470,7 +486,13 @@ class StaticChecker(BaseVisitor, Utils):
         return (member_typ.rettype, True)
 
     def visitNewExpr(self, ast: NewExpr, env):
-        typ: ClassType = self.scope_stack.find_in_all_scope(ast.classname.name)[0]
+        res = self.scope_stack.find_in_all_scope(ast.classname.name)
+        if res is None:
+            # 2.2 Undeclared Identifier/Attribute/Method/Class
+            raise Undeclared(Class(), ast.classname.name)
+
+        typ: ClassType = res[0]
+
         if type(typ) is not ClassType:
             # 2.5 Type Mismatch In Expression
             # For a new expression, the corresponding class
@@ -529,7 +551,7 @@ class StaticChecker(BaseVisitor, Utils):
             member = bkclass.get_member(ast.fieldname.name, env)
         else:
             # ast.obj can be Id or SelfLiteral
-            obj = self.visit(ast.obj, env)[0]
+            obj: ClassType = self.visit(ast.obj, env)[0]
             if type(obj) != ClassType:
                 # 2.5 Type Mismatch In Expression
                 # For an attribute access E.id, E must be in class typ
@@ -543,7 +565,7 @@ class StaticChecker(BaseVisitor, Utils):
                 currentbkclass: BKClass = self.lookup(
                     current_classname, env, lambda x: x.name
                 )
-                if not currentbkclass.is_current_or_ancestor(obj.name, env):
+                if not currentbkclass.is_current_or_ancestor(obj.classname.name, env):
                     raise TypeMismatchInExpression(ast)
 
             bkclass: BKClass = self.lookup(obj.classname.name, env, lambda x: x.name)
@@ -554,7 +576,7 @@ class StaticChecker(BaseVisitor, Utils):
 
         if member is None:
             # 2.2 Undeclared Identifier/Attribute/Method/Class
-            raise Undeclared(Attribute(), ast.fieldname)
+            raise Undeclared(Attribute(), ast.fieldname.name)
 
         return (member.typ, not member.isMu)
 
@@ -565,7 +587,9 @@ class StaticChecker(BaseVisitor, Utils):
     def visitIf(self, ast: If, env):
         # FIXME: understand if preStmt scope context
         if ast.preStmt is not None:
+            self.scope_stack.enter_scope()
             self.visit(ast.preStmt, env)
+            self.scope_stack.exit_scope()
 
         cond_type = self.visit(ast.expr, env)[0]
         if type(cond_type) is not BoolType:
